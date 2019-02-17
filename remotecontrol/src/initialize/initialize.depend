@@ -1,0 +1,134 @@
+# depslib dependency file v1.0
+1277643002 source:d:\project_kms\initialize\main.c
+	"../kms/km_head.h"
+	<stdio.h>
+	<Iphlpapi.h.>
+	<vfw.h>
+	<process.h>
+	"lzw.h"
+
+1278519782 d:\project_kms\kms\km_head.h
+	<winsock2.h>
+	<windows.h>
+
+1206707814 source:d:\project_kms\initialize\lzma\7zbuf.c
+	"7zBuf.h"
+
+1223114000 d:\project_kms\initialize\lzma\7zbuf.h
+	"Types.h"
+
+1227415556 d:\project_kms\initialize\lzma\types.h
+	<stddef.h>
+	<windows.h>
+
+1223114000 source:d:\project_kms\initialize\lzma\7zbuf2.c
+	<string.h>
+	"7zBuf.h"
+
+1217944630 source:d:\project_kms\initialize\lzma\7zcrc.c
+	"7zCrc.h"
+
+1205400402 d:\project_kms\initialize\lzma\7zcrc.h
+	<stddef.h>
+	"Types.h"
+
+1227351290 source:d:\project_kms\initialize\lzma\7zfile.c
+	"7zFile.h"
+	<errno.h>
+
+1227351290 d:\project_kms\initialize\lzma\7zfile.h
+	<windows.h>
+	<stdio.h>
+	"Types.h"
+
+1227417354 source:d:\project_kms\initialize\lzma\7zstream.c
+	<string.h>
+	"Types.h"
+
+1222257108 source:d:\project_kms\initialize\lzma\alloc.c
+	<windows.h>
+	<stdlib.h>
+	"Alloc.h"
+	<stdio.h>
+
+1205400432 d:\project_kms\initialize\lzma\alloc.h
+	<stddef.h>
+
+1223114000 source:d:\project_kms\initialize\lzma\bcj2.c
+	"Bcj2.h"
+
+1223114000 d:\project_kms\initialize\lzma\bcj2.h
+	"Types.h"
+
+1223114000 source:d:\project_kms\initialize\lzma\bra.c
+	"Bra.h"
+
+1223114000 d:\project_kms\initialize\lzma\bra.h
+	"Types.h"
+
+1223114000 source:d:\project_kms\initialize\lzma\bra86.c
+	"Bra.h"
+
+1223114000 source:d:\project_kms\initialize\lzma\braia64.c
+	"Bra.h"
+
+1223114000 source:d:\project_kms\initialize\lzma\lzfind.c
+	<string.h>
+	"LzFind.h"
+	"LzHash.h"
+
+1223114000 d:\project_kms\initialize\lzma\lzfind.h
+	"Types.h"
+
+1223114000 d:\project_kms\initialize\lzma\lzhash.h
+
+1262758960 source:d:\project_kms\initialize\lzma\lzfindmt.c
+	"LzHash.h"
+	"LzFindMt.h"
+
+1223114000 d:\project_kms\initialize\lzma\lzfindmt.h
+	"Threads.h"
+	"LzFind.h"
+
+1262758990 d:\project_kms\initialize\lzma\threads.h
+	"Types.h"
+
+1225956668 source:d:\project_kms\initialize\lzma\lzmadec.c
+	"LzmaDec.h"
+	<string.h>
+
+1223114000 d:\project_kms\initialize\lzma\lzmadec.h
+	"Types.h"
+
+1233560064 source:d:\project_kms\initialize\lzma\lzmaenc.c
+	<string.h>
+	<stdio.h>
+	"LzmaEnc.h"
+	"LzFind.h"
+	"LzFindMt.h"
+
+1223114000 d:\project_kms\initialize\lzma\lzmaenc.h
+	"Types.h"
+
+1217944812 source:d:\project_kms\initialize\lzma\lzmalib.c
+	"LzmaEnc.h"
+	"LzmaDec.h"
+	"Alloc.h"
+	"LzmaLib.h"
+
+1217944814 d:\project_kms\initialize\lzma\lzmalib.h
+	"Types.h"
+
+1262759140 source:d:\project_kms\initialize\lzma\threads.c
+	"Threads.h"
+	<process.h>
+
+1263124754 source:d:\project_kms\initialize\lzw.c
+	"lzw.h"
+
+1263124734 d:\project_kms\initialize\lzw.h
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<memory.h>
+

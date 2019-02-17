@@ -1,0 +1,34 @@
+# depslib dependency file v1.0
+1264008348 source:d:\project_kms\exe_screen\km_socket.c
+	"km_socket.h"
+
+1263913992 d:\project_kms\exe_screen\km_socket.h
+	"km_head.h"
+	<stdio.h>
+	<stdlib.h>
+	<process.h>
+
+1263480996 d:\project_kms\exe_screen\km_head.h
+	<winsock2.h>
+	<windows.h>
+
+1278774704 source:d:\project_kms\exe_screen\km_main_event.c
+	"km_main_event.h"
+	"lzw.h"
+
+1263914810 d:\project_kms\exe_screen\km_main_event.h
+	"km_socket.h"
+
+1278681700 source:d:\project_kms\exe_screen\main.c
+	"km_socket.h"
+	"km_main_event.h"
+
+1263124754 source:d:\project_kms\exe_screen\lzw.c
+	"lzw.h"
+
+1263124734 d:\project_kms\exe_screen\lzw.h
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<memory.h>
+

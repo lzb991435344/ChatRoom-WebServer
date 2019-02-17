@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Release" />
+	<File name="lzw.h" open="1" top="0" tabpos="8">
+		<Cursor position="1022" topLine="23" />
+	</File>
+	<File name="main.c" open="1" top="1" tabpos="7">
+		<Cursor position="4980" topLine="240" />
+	</File>
+</CodeBlocks_layout_file>

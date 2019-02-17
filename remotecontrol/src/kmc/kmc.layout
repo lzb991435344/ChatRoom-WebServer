@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="crc32.c" open="0" top="0" tabpos="15">
+		<Cursor position="6654" topLine="166" />
+	</File>
+	<File name="file.c" open="0" top="0" tabpos="16">
+		<Cursor position="242" topLine="0" />
+	</File>
+	<File name="file.h" open="0" top="0" tabpos="0">
+		<Cursor position="100" topLine="0" />
+	</File>
+	<File name="frame_tools.c" open="0" top="0" tabpos="9">
+		<Cursor position="1044" topLine="22" />
+	</File>
+	<File name="frame_tools.h" open="0" top="0" tabpos="0">
+		<Cursor position="641" topLine="0" />
+	</File>
+	<File name="ip_info.c" open="1" top="0" tabpos="4">
+		<Cursor position="275" topLine="3" />
+	</File>
+	<File name="ip_info.h" open="0" top="0" tabpos="0">
+		<Cursor position="77" topLine="0" />
+	</File>
+	<File name="km_head.h" open="0" top="0" tabpos="4">
+		<Cursor position="9189" topLine="276" />
+	</File>
+	<File name="km_socket.c" open="1" top="0" tabpos="2">
+		<Cursor position="1401" topLine="9" />
+	</File>
+	<File name="km_socket.h" open="0" top="0" tabpos="4">
+		<Cursor position="426" topLine="0" />
+	</File>
+	<File name="lzw.c" open="0" top="0" tabpos="7">
+		<Cursor position="9707" topLine="389" />
+	</File>
+	<File name="m_frame_cap_screen.c" open="0" top="0" tabpos="6">
+		<Cursor position="8770" topLine="199" />
+	</File>
+	<File name="m_frame_cap_screen.h" open="0" top="0" tabpos="2">
+		<Cursor position="420" topLine="0" />
+	</File>
+	<File name="m_frame_cap_screen_event.c" open="0" top="0" tabpos="3">
+		<Cursor position="986" topLine="15" />
+	</File>
+	<File name="m_frame_cap_screen_event.h" open="0" top="0" tabpos="0">
+		<Cursor position="186" topLine="0" />
+	</File>
+	<File name="m_frame_file.c" open="1" top="0" tabpos="7">
+		<Cursor position="5797" topLine="133" />
+	</File>
+	<File name="m_frame_file.h" open="0" top="0" tabpos="11">
+		<Cursor position="247" topLine="0" />
+	</File>
+	<File name="m_frame_file_event.c" open="0" top="0" tabpos="6">
+		<Cursor position="417" topLine="50" />
+	</File>
+	<File name="m_frame_file_event.h" open="0" top="0" tabpos="0">
+		<Cursor position="1083" topLine="0" />
+	</File>
+	<File name="m_frame_file_updown.c" open="0" top="0" tabpos="0">
+		<Cursor position="1721" topLine="113" />
+	</File>
+	<File name="m_frame_file_updown.h" open="0" top="0" tabpos="0">
+		<Cursor position="1153" topLine="0" />
+	</File>
+	<File name="m_frame_screen.c" open="1" top="0" tabpos="11">
+		<Cursor position="19332" topLine="402" />
+	</File>
+	<File name="m_frame_screen.h" open="0" top="0" tabpos="1">
+		<Cursor position="298" topLine="0" />
+	</File>
+	<File name="m_frame_screen_event.c" open="1" top="1" tabpos="12">
+		<Cursor position="4278" topLine="99" />
+	</File>
+	<File name="m_frame_screen_event.h" open="0" top="0" tabpos="5">
+		<Cursor position="402" topLine="0" />
+	</File>
+	<File name="m_make_center.c" open="0" top="0" tabpos="6">
+		<Cursor position="1236" topLine="18" />
+	</File>
+	<File name="m_make_center.h" open="0" top="0" tabpos="5">
+		<Cursor position="196" topLine="0" />
+	</File>
+	<File name="m_make_file.c" open="1" top="0" tabpos="3">
+		<Cursor position="1685" topLine="19" />
+	</File>
+	<File name="m_make_file.h" open="0" top="0" tabpos="7">
+		<Cursor position="66" topLine="0" />
+	</File>
+	<File name="main.c" open="1" top="0" tabpos="5">
+		<Cursor position="949" topLine="0" />
+	</File>
+	<File name="main_frame.c" open="1" top="0" tabpos="6">
+		<Cursor position="14979" topLine="357" />
+	</File>
+	<File name="main_frame.h" open="0" top="0" tabpos="3">
+		<Cursor position="405" topLine="0" />
+	</File>
+	<File name="main_frame_client_op.c" open="1" top="0" tabpos="8">
+		<Cursor position="7188" topLine="226" />
+	</File>
+	<File name="main_frame_client_op.h" open="0" top="0" tabpos="10">
+		<Cursor position="479" topLine="0" />
+	</File>
+	<File name="main_frame_ddos.c" open="1" top="0" tabpos="9">
+		<Cursor position="12049" topLine="353" />
+	</File>
+	<File name="main_frame_ddos.h" open="0" top="0" tabpos="4">
+		<Cursor position="92" topLine="0" />
+	</File>
+	<File name="main_frame_event.c" open="1" top="0" tabpos="10">
+		<Cursor position="3398" topLine="104" />
+	</File>
+	<File name="main_frame_event.h" open="0" top="0" tabpos="5">
+		<Cursor position="129" topLine="0" />
+	</File>
+	<File name="main_frame_log.c" open="0" top="0" tabpos="0">
+		<Cursor position="506" topLine="15" />
+	</File>
+	<File name="main_frame_log.h" open="0" top="0" tabpos="0">
+		<Cursor position="72" topLine="0" />
+	</File>
+	<File name="module_manger.c" open="0" top="0" tabpos="8">
+		<Cursor position="475" topLine="0" />
+	</File>
+	<File name="module_manger.h" open="0" top="0" tabpos="0">
+		<Cursor position="266" topLine="0" />
+	</File>
+	<File name="resource.h" open="0" top="0" tabpos="0">
+		<Cursor position="1981" topLine="25" />
+	</File>
+	<File name="tcs.rc" open="0" top="0" tabpos="0">
+		<Cursor position="3026" topLine="107" />
+	</File>
+</CodeBlocks_layout_file>

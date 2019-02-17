@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1278346714 source:d:\project_kms\mod_file\main.c
+	"../kms/km_head.h"
+	<stdio.h>
+	"up_down_file.h"
+
+1278519782 d:\project_kms\kms\km_head.h
+	<winsock2.h>
+	<windows.h>
+
+1263131388 source:d:\project_kms\mod_file\up_down_file.c
+	"up_down_file.h"
+
+1278346776 d:\project_kms\mod_file\up_down_file.h
+	"../kms/km_head.h"
+	<stdio.h>
+

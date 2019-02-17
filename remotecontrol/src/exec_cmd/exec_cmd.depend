@@ -1,0 +1,15 @@
+# depslib dependency file v1.0
+1249226802 source:d:\project\tcs\exec_cmd\main.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<winsock2.h>
+	<process.h>
+
+1278679414 source:d:\project_old\tcs\exec_cmd\main.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<winsock2.h>
+	<process.h>
+

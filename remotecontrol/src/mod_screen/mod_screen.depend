@@ -1,0 +1,11 @@
+# depslib dependency file v1.0
+1264008362 source:d:\project_kms\mod_screen\main.c
+	"../kms/km_head.h"
+	<stdio.h>
+	<Tlhelp32.h>
+	<Userenv.h>
+
+1278519782 d:\project_kms\kms\km_head.h
+	<winsock2.h>
+	<windows.h>
+

@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1278179492 source:d:\project_kms\mod_ddos\main.c
+	"main.h"
+	<stdio.h>
+	<process.h>
+
+1278519782 d:\project_kms\kms\km_head.h
+	<winsock2.h>
+	<windows.h>
+
+1278099482 d:\project_kms\mod_ddos\main.h
+	"../kms/km_head.h"
+
