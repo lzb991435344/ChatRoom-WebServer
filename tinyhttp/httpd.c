@@ -26,6 +26,7 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 
+//宏定义
 #define ISspace(x) isspace((int)(x))
 
 #define SERVER_STRING "Server: jdbhttpd/0.1.0\r\n"
@@ -36,19 +37,30 @@
 */
 
 void accept_request(int);//接受请求并处理
+
 void bad_request(int);  //无法处理请求，回写错误码400到client
+
 void cat(int, FILE *);//将文件内容发送到客户端
+
 void cannot_execute(int);//执行CGI程序错误的处理
+
 void error_die(const char *);//输出错误信息
+
 //运行Cgi的处理函数
 void execute_cgi(int, const char *, const char *, const char *);
-//读取套接字的一行，把回车，换行等情况同意为换行符结束
+
+//读取套接字的一行，把回车，换行等情况统一为换行符结束
 int get_line(int, char *, int);
+
 void headers(int, const char *);//把http响应的头部写到套接字
+
 void not_found(int);//找不到请求的文件的处理
+
 void serve_file(int, const char *);//调用cat把服务器文件返回给浏览器
+
 //初始化httpd的服务，包含建立套接字，绑定端口，进行监听等。
 int startup(u_short *);
+
 void unimplemented(int);// 返回501状态给客户端
 
 /**********************************************************************/
@@ -58,19 +70,21 @@ void unimplemented(int);// 返回501状态给客户端
 /**********************************************************************/
 void accept_request(int client)
 {
-    char buf[1024];
+    char buf[1024];//缓存数据使用
     int numchars;
-    char method[255];
-    char url[255];
-    char path[512];
+    char method[255];//请求的方法
+    char url[255];//资源定位符
+    char path[512];//文件路径
     size_t i, j;
-    struct stat st;
+    struct stat st;//文件结构体
+    //cgi=1时表示这是个cgi程序
     int cgi = 0;      /* becomes true if server decides this is a CGI program */
     char *query_string = NULL;
 
     /*得到请求的第一行*/
     numchars = get_line(client, buf, sizeof(buf));
-    i = 0; j = 0;
+    i = 0; 
+    j = 0;
     /*把客户端的请求方法存到 method 数组*/
     while (!ISspace(buf[j]) && (i < sizeof(method) - 1))
     {
@@ -80,35 +94,51 @@ void accept_request(int client)
     method[i] = '\0';
 
     /*如果既不是 GET 又不是 POST 则无法处理 */
+    /**
+      strcasecmp（忽略大小写比较字符串）
+      函数原型 int strcasecmp (const char *s1, const char *s2);
+      函数说明 strcasecmp()用来比较参数s1和s2字符串，比较时会自动忽略大小写的差异
+      返回值 若参数s1和s2字符串相等则返回0。s1大于s2则返回大于0 的值，s1 小于s2 则返回小于0的值
+    */
+    //都为真的时候说明字符串不匹配
     if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
     {
         unimplemented(client);
         return;
     }
-
     /* POST 的时候开启 cgi */
     if (strcasecmp(method, "POST") == 0)
         cgi = 1;
 
     /*读取 url 地址*/
     i = 0;
+
+    //忽略空格
     while (ISspace(buf[j]) && (j < sizeof(buf)))
         j++;
+
+    
     while (!ISspace(buf[j]) && (i < sizeof(url) - 1) && (j < sizeof(buf)))
     {
         /*存下 url */
         url[i] = buf[j];
-        i++; j++;
+        i++;
+        j++;
     }
+    //字符数组后加‘\0’
     url[i] = '\0';
 
     /*处理 GET 方法*/
     if (strcasecmp(method, "GET") == 0)
     {
         /* 待处理请求为 url */
+        //字符的指针指向字符数组的首地址
         query_string = url;
+
+        //使用一个指针对url进行解析，读取参数
         while ((*query_string != '?') && (*query_string != '\0'))
             query_string++;
+
         /* GET 方法特点，? 后面为参数*/
         if (*query_string == '?')
         {
@@ -121,13 +151,19 @@ void accept_request(int client)
 
     /*格式化 url 到 path 数组，html 文件都在 htdocs 中*/
     sprintf(path, "htdocs%s", url);
+
     /*默认情况为 index.html */
     if (path[strlen(path) - 1] == '/')
         strcat(path, "index.html");
+
     /*根据路径找到对应文件 */
+    //int stat(const char * file_name, struct stat *buf)
+    //stat()用来将参数file_name 所指的文件状态, 复制到参数buf 所指的结构中。
+    //执行成功则返回0，失败返回-1，错误代码存于errno。
     if (stat(path, &st) == -1) {
         /*把所有 headers 的信息都丢弃*/
         while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
+           //从buf中读取一行
             numchars = get_line(client, buf, sizeof(buf));
         /*回应客户端找不到*/
         not_found(client);
@@ -135,10 +171,13 @@ void accept_request(int client)
     else
     {
         /*如果是个目录，则默认使用该目录下 index.html 文件*/
-        if ((st.st_mode & S_IFMT) == S_IFDIR)
-            strcat(path, "/index.html");
-      if ((st.st_mode & S_IXUSR) || (st.st_mode & S_IXGRP) || (st.st_mode & S_IXOTH)    )
+      if ((st.st_mode & S_IFMT) == S_IFDIR)  //判断是否是一个目录
+            strcat(path, "/index.html"); //连接html的页面到指定的路径
+
+      //文件所有者,用户组,其他用户组具有可执行权限,启动cgi程序
+      if ((st.st_mode & S_IXUSR) || (st.st_mode & S_IXGRP) || (st.st_mode & S_IXOTH))
           cgi = 1;
+
       /*不是 cgi,直接把服务器文件返回，否则执行 cgi */
       if (!cgi)
           serve_file(client, path);
@@ -186,8 +225,8 @@ void cat(int client, FILE *resource)
     fgets(buf, sizeof(buf), resource);
     while (!feof(resource))
     {
-        send(client, buf, strlen(buf), 0);
-        fgets(buf, sizeof(buf), resource);
+        send(client, buf, strlen(buf), 0);//给客户端发送数据
+        fgets(buf, sizeof(buf), resource);//读取文件中的数据
     }
 }
 
@@ -241,9 +280,10 @@ void execute_cgi(int client, const char *path, const char *method, const char *q
     int content_length = -1;
 
     buf[0] = 'A'; buf[1] = '\0';
-    if (strcasecmp(method, "GET") == 0)
+    if (strcasecmp(method, "GET") == 0)  //GET请求
         /*把所有的 HTTP header 读取并丢弃*/
         while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
+            //一行行读取buf中的数据
             numchars = get_line(client, buf, sizeof(buf));
     else    /* POST */
     {
@@ -255,6 +295,7 @@ void execute_cgi(int client, const char *path, const char *method, const char *q
             buf[15] = '\0';
             /* HTTP 请求的特点*/
             if (strcasecmp(buf, "Content-Length:") == 0)
+            //字符串转换成数字
                 content_length = atoi(&(buf[16]));
             numchars = get_line(client, buf, sizeof(buf));
         }
@@ -270,6 +311,7 @@ void execute_cgi(int client, const char *path, const char *method, const char *q
     sprintf(buf, "HTTP/1.0 200 OK\r\n");
     send(client, buf, strlen(buf), 0);
 
+   /**建立输入输出的管道*/
     /* 建立管道*/
     if (pipe(cgi_output) < 0) {
         /*错误处理*/
@@ -283,11 +325,14 @@ void execute_cgi(int client, const char *path, const char *method, const char *q
         return;
     }
 
+
+    //fork()失败
     if ((pid = fork()) < 0 ) {
         /*错误处理*/
         cannot_execute(client);
         return;
     }
+    //子进程
     if (pid == 0)  /* child: CGI script */
     {
         char meth_env[255];
@@ -317,13 +362,16 @@ void execute_cgi(int client, const char *path, const char *method, const char *q
         /*用 execl 运行 cgi 程序*/
         execl(path, path, NULL);
         exit(0);
-    } else {    /* parent */
+    } 
+    //父进程
+    else {    /* parent */
         /* 关闭 cgi_input 的读取端 和 cgi_output 的写入端 */
         close(cgi_output[1]);
         close(cgi_input[0]);
         if (strcasecmp(method, "POST") == 0)
             /*接收 POST 过来的数据*/
-            for (i = 0; i < content_length; i++) {
+            for (i = 0; i < content_length; i++) 
+            {
                 recv(client, &c, 1, 0);
                 /*把 POST 数据写入 cgi_input，现在重定向到 STDIN */
                 write(cgi_input[1], &c, 1);
@@ -363,16 +411,19 @@ int get_line(int sock, char *buf, int size)
     while ((i < size - 1) && (c != '\n'))
     {
         /*一次仅接收一个字节*/
+        //函数原型int recv( _In_ SOCKET s, _Out_ char *buf, _In_ int len, _In_ int flags);
+        //param:socket套接字,buf数组,读取长度,指定调用方式
         n = recv(sock, &c, 1, 0);
         /* DEBUG printf("%02X\n", c); */
         if (n > 0)
         {
-            /*收到 \r 则继续接收下个字节，因为换行符可能是 \r\n */
+            /*收到 \r 则继续接收下个字节，因为换行符可能是 \r\n */ //回车换行 \r\n
             if (c == '\r')
             {
                 /*使用 MSG_PEEK 标志使下一次读取依然可以得到这次读取的内容，可认为接收窗口不滑动*/
                 n = recv(sock, &c, 1, MSG_PEEK);
                 /* DEBUG printf("%02X\n", c); */
+
                 /*但如果是换行符则把它吸收掉*/
                 if ((n > 0) && (c == '\n'))
                     recv(sock, &c, 1, 0);
@@ -386,6 +437,7 @@ int get_line(int sock, char *buf, int size)
         else
             c = '\n';
     }
+    //字符数组末尾添加'\0'
     buf[i] = '\0';
 
     /*返回 buf 数组大小*/
@@ -403,8 +455,10 @@ void headers(int client, const char *filename)
     (void)filename;  /* could use filename to determine file type */
 
     /*正常的 HTTP header */
+    //http头写进buf数组，并发送给客户端
     strcpy(buf, "HTTP/1.0 200 OK\r\n");
     send(client, buf, strlen(buf), 0);
+    
     /*服务器信息*/
     strcpy(buf, SERVER_STRING);
     send(client, buf, strlen(buf), 0);
@@ -552,11 +606,14 @@ socket函数的三个参数分别为：
         int namelen = sizeof(name);
         if (getsockname(httpd, (struct sockaddr *)&name, &namelen) == -1)
             error_die("getsockname");
+        //uint16_t ntohs(uint16_t netshort);
+        //将一个16位数由网络字节顺序转换为主机字节顺序
         *port = ntohs(name.sin_port);
     }
     /*开始监听*/
     if (listen(httpd, 5) < 0)
         error_die("listen");
+
     /*返回 socket id */
     return(httpd);
 }
@@ -600,7 +657,7 @@ int main(void)
     int client_sock = -1;
     struct sockaddr_in client_name;
     int client_name_len = sizeof(client_name);
-    pthread_t newthread;
+    pthread_t newthread;//线程对象
 
     /*在对应端口建立 httpd 服务*/
     server_sock = startup(&port);
