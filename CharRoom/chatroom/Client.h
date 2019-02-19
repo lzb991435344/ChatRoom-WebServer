@@ -6,6 +6,7 @@
 
 using namespace std;
 
+//封装成客户端类
 // 客户端类，用来连接服务器发送和接收消息
 class Client {
 

@@ -67,11 +67,11 @@ void Client::Connect() {
 // 断开连接，清理并关闭文件描述符
 void Client::Close() {
 
-    if(pid){
+    if(pid){ //pid > 0
        //关闭父进程的管道和sock
         close(pipe_fd[0]);
         close(sock);
-    }else{
+    }else{  //pid == 0
         //关闭子进程的管道
         close(pipe_fd[1]);
     }
@@ -108,9 +108,11 @@ void Client::Start() {
             fgets(message, BUF_SIZE, stdin);
 
             // 客户输出exit,退出
+            //strncasecmp()函数的作用是忽略大小写
             if(strncasecmp(message, EXIT, strlen(EXIT)) == 0){
                 isClientwork = 0;
             }
+
             // 子进程将信息写入管道
             else {
                 if( write(pipe_fd[1], message, strlen(message) - 1 ) < 0 ) { 

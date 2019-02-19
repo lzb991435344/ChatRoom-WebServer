@@ -1,2 +1,0 @@
-2018/11/12 01:07:10 [emerg] 3744#14924: CreateFile() "C:\Users\Administrator\Desktop\面试准备\C++类库和工具\nginx\nginx-1.9.9/conf/nginx.conf" failed (1113: No mapping for the Unicode character exists in the target multi-byte code page)
-2018/11/12 01:07:19 [emerg] 2216#16024: CreateFile() "C:\Users\Administrator\Desktop\面试准备\C++类库和工具\nginx\nginx-1.9.9/conf/nginx.conf" failed (1113: No mapping for the Unicode character exists in the target multi-byte code page)

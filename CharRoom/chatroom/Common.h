@@ -45,7 +45,6 @@
 // 参数enable_et表示是否启用ET模式，如果为True则启用，否则使用LT模式
 static void addfd( int epollfd, int fd, bool enable_et )
 {
-	
 	/**
 	struct epoll_event {
 		uint32_t     events;      // Epoll events 
@@ -63,12 +62,14 @@ static void addfd( int epollfd, int fd, bool enable_et )
 	uint32_t     u32;
 	uint64_t     u64;
 	} epoll_data_t;
-
 	*/
+
     struct epoll_event ev;
     ev.data.fd = fd;
+
+	//设置可读的文件描述符
     ev.events = EPOLLIN;//可读
-    if( enable_et )
+    if( enable_et ) //这里做判断是否启用et模式，true则启用，否则是LT模式
         ev.events = EPOLLIN | EPOLLET;
 
 	/**
@@ -134,7 +135,7 @@ l_whence 也有三种方式 :
 
 	//F_GETFL 取得文件描述词状态旗标，此旗标为open（）的参数flags。
 
-	//设置文件描述符的状态旗标
+	//设置文件描述符的状态旗标,非阻塞
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFD, 0)| O_NONBLOCK);
     printf("fd added to epoll!\n\n");
 }
