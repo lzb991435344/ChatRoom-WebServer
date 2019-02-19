@@ -28,24 +28,28 @@ Client::Client(){
 }
 
 // 连接服务器
-void Client::Connect() {
+void Client::Connect()
+{
     cout << "Connect Server: " << SERVER_IP << " : " << SERVER_PORT << endl;
     
     // 创建socket
     sock = socket(PF_INET, SOCK_STREAM, 0);
-    if(sock < 0) {
+    if(sock < 0)
+    {
         perror("sock error");
         exit(-1); 
     }
 
     // 连接服务端
-    if(connect(sock, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
+    if(connect(sock, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
+    {
         perror("connect error");
         exit(-1);
     }
 
     // 创建管道，其中fd[0]用于父进程读，fd[1]用于子进程写
-    if(pipe(pipe_fd) < 0) {
+    if(pipe(pipe_fd) < 0) 
+    {
         perror("pipe error");
         exit(-1);
     }
@@ -53,7 +57,8 @@ void Client::Connect() {
     // 创建epoll
     epfd = epoll_create(EPOLL_SIZE);
     
-    if(epfd < 0) {
+    if(epfd < 0) 
+    {
         perror("epfd error");
         exit(-1); 
     }
@@ -65,13 +70,17 @@ void Client::Connect() {
 }
 
 // 断开连接，清理并关闭文件描述符
-void Client::Close() {
+void Client::Close()
+{
 
-    if(pid){ //pid > 0
+    if(pid)//pid > 0
+    { 
        //关闭父进程的管道和sock
         close(pipe_fd[0]);
         close(sock);
-    }else{  //pid == 0
+    }
+    else
+    {  //pid == 0
         //关闭子进程的管道
         close(pipe_fd[1]);
     }
@@ -90,12 +99,14 @@ void Client::Start() {
     pid = fork();
     
     // 如果创建子进程失败则退出
-    if(pid < 0) {
+    if(pid < 0) 
+    {
         perror("fork error");
         close(sock);
         exit(-1);
-    } else if(pid == 0) {
-        // 进入子进程执行流程
+    }
+    else if(pid == 0)  // 进入子进程执行流程
+    {
         //子进程负责写入管道，因此先关闭读端
         close(pipe_fd[0]); 
 
@@ -104,30 +115,33 @@ void Client::Start() {
 
         // 如果客户端运行正常则不断读取输入发送给服务端
         while(isClientwork){
-            bzero(&message, BUF_SIZE);
-            fgets(message, BUF_SIZE, stdin);
+            bzero(&message, BUF_SIZE);//快速初始化buff数组为0
+            fgets(message, BUF_SIZE, stdin);//从标准输入流中读取消息，即支持用户输入
 
             // 客户输出exit,退出
             //strncasecmp()函数的作用是忽略大小写
-            if(strncasecmp(message, EXIT, strlen(EXIT)) == 0){
+            if(strncasecmp(message, EXIT, strlen(EXIT)) == 0)
+            {
                 isClientwork = 0;
             }
-
             // 子进程将信息写入管道
             else {
-                if( write(pipe_fd[1], message, strlen(message) - 1 ) < 0 ) { 
+                if( write(pipe_fd[1], message, strlen(message) - 1 ) < 0 ) 
+                { 
                     perror("fork error");
                     exit(-1);
                 }
             }
         }
-    } else { 
-        //pid > 0 父进程
+    } 
+    else 
+    { //pid > 0 父进程
         //父进程负责读管道数据，因此先关闭写端
         close(pipe_fd[1]); 
 
         // 主循环(epoll_wait)
-        while(isClientwork) {
+        while(isClientwork) 
+        {
             int epoll_events_count = epoll_wait( epfd, events, 2, -1 );
 
             //处理就绪事件
@@ -142,11 +156,15 @@ void Client::Start() {
                     int ret = recv(sock, message, BUF_SIZE, 0);
 
                     // ret= 0 服务端关闭
-                    if(ret == 0) {
+                    if(ret == 0) 
+                    {
                         cout << "Server closed connection: " << sock << endl;
                         close(sock);
                         isClientwork = 0;
-                    } else {
+                    } 
+                    else 
+                    {
+                        //打印输出消息
                         cout << message << endl;
                     }
                 }
@@ -158,15 +176,15 @@ void Client::Start() {
                     // ret = 0
                     if(ret == 0)
                         isClientwork = 0;
-                    else {
-                        // 将信息发送给服务端
+                    else //有数据
+                    {
+                        //将信息发送给服务端
                         send(sock, message, BUF_SIZE, 0);
                     }
                 }
             }//for
         }//while
     }
-    
     // 退出进程
     Close();
 }

@@ -44,7 +44,10 @@ void Server::Init() {
 	 参数3:指定的协议
 	*/
     listener = socket(PF_INET, SOCK_STREAM, 0);
-    if(listener < 0) { perror("listener"); exit(-1);}
+    if(listener < 0)
+    {
+        perror("listener"); exit(-1);
+    }
     
     //绑定地址
 	/**
@@ -53,7 +56,8 @@ void Server::Init() {
 	参数2:要绑定的协议地址
 	参数3:对应地址的长度
 	*/
-    if( bind(listener, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
+    if( bind(listener, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) 
+    {
         perror("bind error");
         exit(-1);
     }
@@ -77,7 +81,8 @@ void Server::Init() {
     //在内核中创建事件表
     epfd = epoll_create(EPOLL_SIZE);
     
-    if(epfd < 0) {
+    if(epfd < 0) 
+    {
         perror("epfd error");
         exit(-1);
     }
@@ -159,15 +164,16 @@ int Server::SendBroadcastMessage(int clientfd)
         list<int>::iterator it;
 		//迭代整个客户端的列表
         for(it = clients_list.begin(); it != clients_list.end(); ++it) {
+            //不发给自己
            if(*it != clientfd){
-			   //
+			   //发送消息,迭代器迭代客户端列表
                 if( send(*it, message, BUF_SIZE, 0) < 0 ) {
                     return -1;
                 }
            }
         }
     }
-    return len;
+    return len;//返回发送消息的条数
 }
 
 // 启动服务端
@@ -185,7 +191,8 @@ void Server::Start() {
         //epoll_events_count表示就绪事件的数目
         int epoll_events_count = epoll_wait(epfd, events, EPOLL_SIZE, -1);
 
-        if(epoll_events_count < 0) {
+        if(epoll_events_count < 0)
+        {
             perror("epoll failure");
             break;
         }
@@ -195,6 +202,7 @@ void Server::Start() {
         //处理这epoll_events_count个就绪事件
         for(int i = 0; i < epoll_events_count; ++i)
         {
+            //从事件类表中获取fd
             int sockfd = events[i].data.fd;
             //新用户连接
             if(sockfd == listener)//listener是创建监听的socket

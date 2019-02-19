@@ -74,7 +74,8 @@ static void addfd( int epollfd, int fd, bool enable_et )
 
 	/**
 	int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
-	epfd是创建的句柄，op包含三种：
+	epfd是创建的句柄，
+	op包含三种：
     a.EPOLL_CTL_ADD，向epfd注册fd的上的event
 	b.EPOLL_CTL_MOD，修改fd已注册的event
 	c.EPOLL_CTL_DEL，从epfd上删除fd的event
