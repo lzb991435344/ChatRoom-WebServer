@@ -5,24 +5,25 @@
 
 #define STRING_SIZE_INC 64
 
-//×Ö·û´®À©Õ¹³¤¶È,ÖØĞÂ·ÖÅäÄÚ´æ¿Õ¼ä
+//
+//å­—ç¬¦ä¸²æ‰©å±•é•¿åº¦,é‡æ–°åˆ†é…å†…å­˜ç©ºé—´
 void string_extend(string *s, size_t new_len) {
     assert(s != NULL);
 
-    if (new_len >= s->size) {//´óÓÚµ±Ç°µÄ×Ö·û´®³¤¶È
+    if (new_len >= s->size) {//å¤§äºå½“å‰çš„å­—ç¬¦ä¸²é•¿åº¦
         s->size += new_len - s->size;
-		//À©Õ¹µ½64Î»
+		//æ‰©å±•åˆ°64ä½
         s->size += STRING_SIZE_INC - (s->size % STRING_SIZE_INC);
-        s->ptr = realloc(s->ptr, s->size);//ÖØĞÂ·ÖÅä¿Õ¼ä
+        s->ptr = realloc(s->ptr, s->size);//é‡æ–°åˆ†é…ç©ºé—´
     }
 }
 
-//³õÊ¼»¯×Ö·û´®
+//åˆå§‹åŒ–å­—ç¬¦ä¸²
 string* string_init() {
     string *s;
-    s = malloc(sizeof(*s));//·ÖÅä¿Õ¼ä
-    s->ptr = NULL;//Ö¸ÕëÖÃÎª¿Õ
-    s->size = s->len = 0;//³¤¶ÈÉèÖÃÎª0
+    s = malloc(sizeof(*s));//åˆ†é…ç©ºé—´
+    s->ptr = NULL;//æŒ‡é’ˆç½®ä¸ºç©º
+    s->size = s->len = 0;//é•¿åº¦è®¾ç½®ä¸º0
     
     return s;
 }
@@ -37,7 +38,7 @@ string* string_init_str(const char *str) {
 void string_free(string *s) {
     if (!s) return;
 
-    free(s->ptr);//Ïú»ÙÖ¸Õë
+    free(s->ptr);//é”€æ¯æŒ‡é’ˆ
     free(s);
 }
 
@@ -50,24 +51,24 @@ void string_reset(string *s) {
     s->len = 0;
 }
 
-//¸´ÖÆ×Ö·û´®
+//å¤åˆ¶å­—ç¬¦ä¸²
 int string_copy_len(string *s, const char *str, size_t str_len) {
-	//Ê×ÏÈ¶ÏÑÔ
+	//é¦–å…ˆæ–­è¨€
     assert(s != NULL);
     assert(str != NULL);
 
     if (str_len <= 0) return 0;
 
-	//¼Ó1µÄÔ­ÒòÊÇ'\0'
+	//åŠ 1çš„åŸå› æ˜¯'\0'
     string_extend(s, str_len + 1);
-	//¸´ÖÆ×Ö·û´®
+	//å¤åˆ¶å­—ç¬¦ä¸²
     strncpy(s->ptr, str, str_len);
-	//ÖØĞÂ¸³Öµ×Ö·û´®µÄ³¤¶È
+	//é‡æ–°èµ‹å€¼å­—ç¬¦ä¸²çš„é•¿åº¦
     s->len = str_len;
-	//Ìí¼Ó'\0'
+	//æ·»åŠ '\0'
     s->ptr[s->len] = '\0';
 
-    return str_len;//·µ»Ø×Ö·û´®µÄ³¤¶È
+    return str_len;//è¿”å›å­—ç¬¦ä¸²çš„é•¿åº¦
 }
 
 int string_copy(string *s, const char *str) {
@@ -97,7 +98,7 @@ int string_append_int(string *s, int i) {
     }
     
     while (i) {
-        buf[len++] = digits[i % 10];//Êı×ÖµÄË÷Òı¶¨ÒåÊÇ0-9
+        buf[len++] = digits[i % 10];//æ•°å­—çš„ç´¢å¼•å®šä¹‰æ˜¯0-9
         i = i / 10;
     }
 
@@ -112,37 +113,37 @@ int string_append_int(string *s, int i) {
     
 }
 
-//×Ö·û´®À©Õ¹³¤¶È£¬·µ»Ø³¤¶È
+//å­—ç¬¦ä¸²æ‰©å±•é•¿åº¦ï¼Œè¿”å›é•¿åº¦
 int string_append_len(string *s, const char *str, size_t str_len) {
-	//ÅĞ¶Ï²ÎÊı
+	//åˆ¤æ–­å‚æ•°
     assert(s != NULL);
     assert(str != NULL);
     if (str_len <= 0) return 0;
 
-	//ÏÈÀ©Õ¹³¤¶È
+	//å…ˆæ‰©å±•é•¿åº¦
     string_extend(s, s->len + str_len + 1);
 
-	//memcpy()×Ö·û´®µÄÄÚÈİ
+	//memcpy()å­—ç¬¦ä¸²çš„å†…å®¹
     memcpy(s->ptr + s->len, str, str_len);
-    s->len += str_len;//Ôö¼Ó³¤¶È
-    s->ptr[s->len] = '\0';//Ìí¼Ó'\0'
+    s->len += str_len;//å¢åŠ é•¿åº¦
+    s->ptr[s->len] = '\0';//æ·»åŠ '\0'
 
-    return str_len;//·µ»Ø³¤¶È
+    return str_len;//è¿”å›é•¿åº¦
 }
 
 int string_append(string *s, const char *str) {
     return string_append_len(s, str, strlen(str));
 }
 
-//Ìí¼ÓĞÂµÄ×Ö·û
+//æ·»åŠ æ–°çš„å­—ç¬¦
 int string_append_ch(string *s, char ch) {
     assert(s != NULL);
 
-	//À©Õ¹µÄ³¤¶È+2
+	//æ‰©å±•çš„é•¿åº¦+2
     string_extend(s, s->len + 2);
 
-    s->ptr[s->len++] = ch;//°Ñ×Ö·û·Å½ø×Ö·ûÊı×é
-    s->ptr[s->len] = '\0';//Ìí¼Ó'\0'
+    s->ptr[s->len++] = ch;//æŠŠå­—ç¬¦æ”¾è¿›å­—ç¬¦æ•°ç»„
+    s->ptr[s->len] = '\0';//æ·»åŠ '\0'
 
     return 1;
 }
