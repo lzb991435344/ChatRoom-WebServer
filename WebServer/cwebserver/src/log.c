@@ -14,7 +14,8 @@ void log_open(server *serv, const char *logfile) {
         serv->logfp = fopen(logfile, "a");
 
 		//无日志文件
-        if (!serv->logfp) {
+        if (!serv->logfp) 
+        {
             perror(logfile);
             exit(1);
         }
@@ -25,14 +26,16 @@ void log_open(server *serv, const char *logfile) {
 }
 
 // 关闭日志文件
-void log_close(server *serv) {
+void log_close(server *serv) 
+{
     if (serv->logfp)
         fclose(serv->logfp);
     closelog();//打开的日志也是资源，需要回收
 }
 
 // 生成时间戳字符串
-static void date_str(string *s) {
+static void date_str(string *s)
+{
 	/**
 	struct tm
   { 　
@@ -69,7 +72,8 @@ static void date_str(string *s) {
     ti = localtime(&rawtime);
     zone = ti->tm_gmtoff / 60;
 
-    if (ti->tm_zone < 0) {
+    if (ti->tm_zone < 0) 
+    {
         zone_sign = '-';
         zone = -zone;
     } else
@@ -91,10 +95,10 @@ static void date_str(string *s) {
 	/**
 	int snprintf(char *str, size_t size, const char *format, ...)。
 	将可变个参数(...)按照format格式化成字符串，然后将其复制到str中
-(1) 如果格式化后的字符串长度 < size，则将此字符串全部复制到str中，并给其后添加一个字符串
-  结束符('\0')；
-(2) 如果格式化后的字符串长度 >= size，则只将其中的(size-1)个字符复制到str中，并给其后添加一个
-  字符串结束符('\0')，返回值为欲写入的字符串长度。
+    (1) 如果格式化后的字符串长度 < size，则将此字符串全部复制到str中，并给其后添加一个字符串
+     结束符('\0')；
+    (2) 如果格式化后的字符串长度 >= size，则只将其中的(size-1)个字符复制到str中，并给其后添加一个
+     字符串结束符('\0')，返回值为欲写入的字符串长度。
 	*/
     snprintf(zone_str, sizeof(zone_str), " %c%.4d", zone_sign, zone);
 
@@ -123,27 +127,31 @@ void log_request(server *serv, connection *con) {
     date_str(date);
 
     // 日志中需要记录的项目：IP，时间，访问方法，URI，版本，状态，内容长度
-    if (serv->use_logfile) {
+    if (serv->use_logfile) 
+    {
         fprintf(serv->logfp, "%s - - [%s] \"%s %s %s\" %d %s\n",
                 host_ip, date->ptr, req->method_raw, req->uri,
                 req->version_raw, con->status_code, content_len);
         fflush(serv->logfp);
-    } else {
+    } 
+    else
+    {
         syslog(LOG_ERR, "%s - - [%s] \"%s %s %s\" %d %s",
                 host_ip, date->ptr, req->method_raw, req->uri,
                 req->version_raw, con->status_code, content_len);
     }
-
     string_free(date);
 }
 
 // 写入日志函数
 //参数1:指向服务器结构体的指针,参数2:类型,参数3:格式,参数4:变参的变量
-static void log_write(server *serv, const char *type, const char *format, va_list ap) {
+static void log_write(server *serv, const char *type, const char *format, va_list ap) 
+{
     string *output = string_init();//把时间和消息类型写到字符串指针out
 
     // 写入时间，消息类型
-    if (serv->use_logfile) {
+    if (serv->use_logfile) 
+    {
         string_append_ch(output, '[');
         date_str(output);//时间戳
         string_append(output, "] ");
@@ -155,11 +163,14 @@ static void log_write(server *serv, const char *type, const char *format, va_lis
     
     string_append(output, format);
 
-    if (serv->use_logfile) {//使用日志文件
+    if (serv->use_logfile) 
+    {//使用日志文件
         string_append_ch(output, '\n');
         vfprintf(serv->logfp, output->ptr, ap);
         fflush(serv->logfp);//刷新流
-    } else {
+    } 
+    else 
+    {
 		/**
 		void syslog(int priority, const char * message, ...);
 		LOG_ERR：错误发生
@@ -179,15 +190,14 @@ void log_error(server *serv, const char *format, ...) {
 }
 
 // 记录日志信息
-void log_info(server *serv, const char *format, ...) {
-
+void log_info(server *serv, const char *format, ...) 
+{
 	/**valist作用:用于解决变参数的一组宏
 	#include <stdarg.h>，用于获取不确定个数的参数。
    （1）首先在函数里定义一具VA_LIST型的变量，这个变量是指向参数的指针；
    （2）然后用VA_START宏初始化刚定义的VA_LIST变量；
    （3）然后用VA_ARG返回可变的参数，VA_ARG的第二个参数是你要返回的参数的类型（如果函数有多个可变参数的，依次调用VA_ARG获取各个参数）；
    （4）最后用VA_END宏结束可变参数的获取
-	
 	*/
     va_list ap;
     va_start(ap, format);

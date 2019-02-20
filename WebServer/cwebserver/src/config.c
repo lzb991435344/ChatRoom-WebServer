@@ -31,11 +31,14 @@ void config_free(config *conf) {
  */
 void config_load(config *conf, const char *fn) {
     char *errormsg;
-    struct stat st;
+    struct stat st;//文件的状态结构体对象
     string *line;
     string *buf;
+
+   //数据格式
     string *key;
     string *value;
+    
     FILE *fp;
     int lineno = 0;
     int is_str = 0;
@@ -43,7 +46,8 @@ void config_load(config *conf, const char *fn) {
 
     // 打开文件
     fp = fopen(fn, "r");
-    if (!fp) {
+    if (!fp) 
+    {
         fprintf(stderr, "%s: failed to open config file\n", fn);
         exit(1);
     }
@@ -56,7 +60,8 @@ void config_load(config *conf, const char *fn) {
     lineno = 1;
 
     // 遍历读取文件中的每个字符
-    while ((ch = fgetc(fp)) != EOF) {
+    while ((ch = fgetc(fp)) != EOF)
+    {
         if (ch != '\n')//回车换行
             string_append_ch(line, ch);
 

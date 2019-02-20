@@ -20,5 +20,5 @@ void config_free(config *conf);
 
 // 加载配置
 void config_load(config *conf, const char *fn);
-
+//
 #endif

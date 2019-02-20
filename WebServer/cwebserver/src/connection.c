@@ -72,7 +72,8 @@ connection* connection_accept(server *serv) {
  * - 3.发送响应
  * - 4.记录请求日志
  */
-int connection_handler(server *serv, connection *con) {
+int connection_handler(server *serv, connection *con) 
+{
     char buf[512];
     int nbytes;
     int ret;
@@ -86,7 +87,7 @@ int connection_handler(server *serv, connection *con) {
     注意：在Unix系统下，如果recv函数在等待协议接收数据时网络断开了，那么调用recv的进程会接
     收到一个SIGPIPE信号，进程对该信号的默认处理是进程终止。
 	*/
-
+    //接收有数据
     while ((nbytes = recv(con->sockfd, buf, sizeof(buf), 0)) > 0) {
         string_append_len(con->recv_buf, buf, nbytes);
 
