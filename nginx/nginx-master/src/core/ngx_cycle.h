@@ -37,50 +37,87 @@ struct ngx_shm_zone_s {
 
 
 struct ngx_cycle_s {
+	//保存存储所有模块的配置项的结构体指针
+    //之所以是4级指针,是因为conf_ctx首先是一个数组
+    //然后存储的元素是指针,该指针又指向另外一个指针数组
     void                  ****conf_ctx;
-    ngx_pool_t               *pool;
+    ngx_pool_t               *pool; //内存池
 
+	/* 在还没有执行ngx_init_cycle之前(即没有解析配置项)
+     * 若此时需要输出日志,就暂时用log,它会直接将信息输出到屏幕
+     * 当解析了配置项之后,会根据nginx.conf配置文件中的配置构建出要求的日志文件并将log重新赋值
+     */
     ngx_log_t                *log;
     ngx_log_t                 new_log;
 
     ngx_uint_t                log_use_stderr;  /* unsigned  log_use_stderr:1; */
 
+	/* files保存所有ngx_connection_t的指针组成的数组 */
     ngx_connection_t        **files;
+	
+	/* 可用的连接池 */
     ngx_connection_t         *free_connections;
+	
+	/* 空闲连接的个数 */
     ngx_uint_t                free_connection_n;
 
     ngx_module_t            **modules;
     ngx_uint_t                modules_n;
     ngx_uint_t                modules_used;    /* unsigned  modules_used:1; */
-
+	
+	/* 双向链表, 存储的元素类型是ngx_connection_t, 代表可重复使用的连接队列 */
     ngx_queue_t               reusable_connections_queue;
     ngx_uint_t                reusable_connections_n;
 
+	/* 动态数组, 存储类型为ngx_listening_t成员, 存储着监听的端口等信息*/
     ngx_array_t               listening;
+	
+	/* 动态数组, 保存nginx所有需要操作的目录, 如果系统中不存在这个目录, 则需要创建
+     * 若创建不成功, nginx启动会失败(比如没有权限什么的,所以master进程最好属于root)
+     */
     ngx_array_t               paths;
 
     ngx_array_t               config_dump;
     ngx_rbtree_t              config_dump_rbtree;
     ngx_rbtree_node_t         config_dump_sentinel;
 
+	/* 单链表, 存储类型为ngx_open_file_t结构体
+     * 它表示nginx已经打开的所有文件
+     * 由感兴趣的模块向其中添加文件路径名
+     * 然后在ngx_init_cycle函数中打开
+     */
     ngx_list_t                open_files;
+	
+	/* 单链表, 存储类型为ngx_shm_zone_t结构体
+     * 每个元素表示一块共享内存
+     */
     ngx_list_t                shared_memory;
 
+	 /* 所有连接对象的总数 */
     ngx_uint_t                connection_n;
+	
+	/* files数组里元素的总数*/
     ngx_uint_t                files_n;
 
+	/* 指向所有连接对象 */
     ngx_connection_t         *connections;
+	
+	 /* 指向所有读事件 */
     ngx_event_t              *read_events;
+	
+	/* 指向所有写事件 */
     ngx_event_t              *write_events;
 
+	 /* 在调用ngx_init_cycle之前,需要一个ngx_cycle_t临时变量来存储一些变量
+     * 调用ngx_init_cycle会将该临时变量传入old_cycle就负责保存这个临时变量*/
     ngx_cycle_t              *old_cycle;
 
-    ngx_str_t                 conf_file;
-    ngx_str_t                 conf_param;
-    ngx_str_t                 conf_prefix;
-    ngx_str_t                 prefix;
-    ngx_str_t                 lock_file;
-    ngx_str_t                 hostname;
+    ngx_str_t                 conf_file;//配置文件相对安装目录的相对路径名
+    ngx_str_t                 conf_param;//需要特殊处理的在命令行携带的参数
+    ngx_str_t                 conf_prefix; //配置文件所在目录的路径
+    ngx_str_t                 prefix;//安装目录的路径
+    ngx_str_t                 lock_file; //文件锁名称
+    ngx_str_t                 hostname;//主机名(通过gethostname系统调用获取)
 };
 
 
