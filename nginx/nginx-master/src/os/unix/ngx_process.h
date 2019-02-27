@@ -38,11 +38,11 @@ typedef struct {
 
     //标识位
 
-    unsigned            respawn:1;
-    unsigned            just_spawn:1;
-    unsigned            detached:1;
-    unsigned            exiting:1;
-    unsigned            exited:1;
+    unsigned            respawn:1;//为1时代表需要重新生成子进程
+    unsigned            just_spawn:1;//为1代表需要生成子进程
+    unsigned            detached:1;//为1代表需要进行父、子进程分离
+    unsigned            exiting:1;//为1代表进程正在退出
+    unsigned            exited:1;//为1代表进程已经退出了
 } ngx_process_t;
 
 
