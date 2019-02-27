@@ -4,7 +4,6 @@
  * Copyright (C) Nginx, Inc.
  */
 
-
 #include <ngx_config.h>
 #include <ngx_core.h>
 
@@ -27,6 +26,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
     HANDLE          events[2];
     char            file[MAX_PATH + 1];
 
+    
     if (respawn >= 0) {
         s = respawn;
 
@@ -36,7 +36,6 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
                 break;
             }
         }
-
         if (s == NGX_MAX_PROCESSES) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, 0,
                           "no more than %d processes can be spawned",
@@ -92,7 +91,11 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
                    "WaitForMultipleObjects: %ul", rc);
 
     switch (rc) {
-
+            /*
+            * ev == WAIT_OBJECT_0
+            * ev == WAIT_OBJECT_0 + 1
+            * ev == WAIT_ABANDONED_0 + 1
+            */
     case WAIT_OBJECT_0:
 
         ngx_processes[s].term = OpenEvent(EVENT_MODIFY_STATE, 0,
@@ -156,11 +159,13 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
 
         goto failed;
     }
-
+    //若respawn大于0,代表重启某个进程完成
+    //其他的信息不需要更改,所以直接返回
     if (respawn >= 0) {
         return pid;
     }
-
+     //根据传入的不同属性
+    //将子进程对应的标识位置位
     switch (respawn) {
 
     case NGX_PROCESS_RESPAWN:
@@ -172,13 +177,14 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
         break;
     }
 
+    //ngx_last_process代表ngx_processes数组中占用了的元素个数
     if (s == ngx_last_process) {
         ngx_last_process++;
     }
 
     return pid;
 
-failed:
+failed://创建失败
 
     if (ngx_processes[s].reopen) {
         ngx_close_handle(ngx_processes[s].reopen);
@@ -209,11 +215,13 @@ ngx_execute(ngx_cycle_t *cycle, ngx_exec_ctx_t *ctx)
     STARTUPINFO          si;
     PROCESS_INFORMATION  pi;
 
+    //初始化pi,si
     ngx_memzero(&si, sizeof(STARTUPINFO));
     si.cb = sizeof(STARTUPINFO);
 
     ngx_memzero(&pi, sizeof(PROCESS_INFORMATION));
 
+    //创建进程
     if (CreateProcess(ctx->path, ctx->args,
                       NULL, NULL, 0, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)
         == 0)
@@ -233,6 +241,6 @@ ngx_execute(ngx_cycle_t *cycle, ngx_exec_ctx_t *ctx)
 
     ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0,
                   "start %s process %P", ctx->name, pi.dwProcessId);
-
+    //返回进程id号
     return pi.dwProcessId;
 }

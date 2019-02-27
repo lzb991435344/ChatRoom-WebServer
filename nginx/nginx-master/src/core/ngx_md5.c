@@ -133,7 +133,7 @@ ngx_md5_final(u_char result[16], ngx_md5_t *ctx)
     (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s))));                \
     (a) += (b)
 
-/*
+/*小端模式
  * SET() reads 4 input bytes in little-endian byte order and stores them
  * in a properly aligned word in host byte order.
  *

@@ -10,7 +10,9 @@
 
 
 static char *ngx_error_log(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+//设置log等级
 static char *ngx_log_set_levels(ngx_conf_t *cf, ngx_log_t *log);
+//插入log
 static void ngx_log_insert(ngx_log_t *log, ngx_log_t *new_log);
 
 
@@ -71,7 +73,7 @@ static ngx_log_t        ngx_log;
 static ngx_open_file_t  ngx_log_file;
 ngx_uint_t              ngx_use_stderr = 1;
 
-
+//静态数组存放错误的等级
 static ngx_str_t err_levels[] = {
     ngx_null_string,
     ngx_string("emerg"),
@@ -84,6 +86,7 @@ static ngx_str_t err_levels[] = {
     ngx_string("debug")
 };
 
+//设置debug的等级
 static const char *debug_levels[] = {
     "debug_core", "debug_alloc", "debug_mutex", "debug_event",
     "debug_http", "debug_mail", "debug_stream"
@@ -254,12 +257,12 @@ ngx_log_abort(ngx_err_t err, const char *fmt, ...)
                   "%*s", p - errstr, errstr);
 }
 
-
+//标准错误输出
 void ngx_cdecl
 ngx_log_stderr(ngx_err_t err, const char *fmt, ...)
 {
     u_char   *p, *last;
-    va_list   args;
+    va_list   args;//可变参数
     u_char    errstr[NGX_MAX_ERROR_STR];
 
     last = errstr + NGX_MAX_ERROR_STR;
@@ -437,7 +440,7 @@ ngx_log_open_default(ngx_cycle_t *cycle)
     return NGX_OK;
 }
 
-
+//重定向标准错误输出
 ngx_int_t
 ngx_log_redirect_stderr(ngx_cycle_t *cycle)
 {
@@ -462,7 +465,7 @@ ngx_log_redirect_stderr(ngx_cycle_t *cycle)
     return NGX_OK;
 }
 
-
+//遍历链表获取日志文件
 ngx_log_t *
 ngx_log_get_file_log(ngx_log_t *head)
 {

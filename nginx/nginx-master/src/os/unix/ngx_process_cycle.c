@@ -473,12 +473,13 @@ ngx_start_cache_manager_processes(ngx_cycle_t *cycle, ngx_uint_t respawn)
     ngx_pass_open_channel(cycle, &ch);
 }
 
-
+//进程间传递消息
 static void
 ngx_pass_open_channel(ngx_cycle_t *cycle, ngx_channel_t *ch)
 {
     ngx_int_t  i;
 
+    /* 遍历从开始直到最后一个存储在ngx_processes数组中有意义的进程 */
     for (i = 0; i < ngx_last_process; i++) {
 
         if (i == ngx_process_slot
@@ -493,9 +494,11 @@ ngx_pass_open_channel(ngx_cycle_t *cycle, ngx_channel_t *ch)
                       ch->slot, ch->pid, ch->fd,
                       i, ngx_processes[i].pid,
                       ngx_processes[i].channel[0]);
-
-        /* TODO: NGX_AGAIN */
-
+        /* 
+             * 给每个进程的父进程发送刚创建的进程的信息,然后该进程的读事件就会被触发,
+             *从而获取该进程的信息
+             * ngx_write_channel中实现了不同进程间文件描述符的传递中的发送文件描述符
+             */
         ngx_write_channel(ngx_processes[i].channel[0],
                           ch, sizeof(ngx_channel_t), cycle->log);
     }
