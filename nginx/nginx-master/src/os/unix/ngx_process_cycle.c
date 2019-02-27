@@ -4,7 +4,17 @@
  * Copyright (C) Nginx, Inc.
  */
 
+/**worker进程初始化所做的工作主要的步骤总结如下:
 
+1.设置ngx_process = NGX_PROCESS_WORKER,在master进程中这个变量被设置为NGX_PROCESS_MASTER;
+
+2.根据配置信息设置执行环境、优先级、资源限制、setgid、setuid、更改工作路径、信号初始化等;
+
+3.调用所有模块的init_process方法;
+
+4.关闭不使用的socket:关闭当前worker进程的写端以及其他worker的读端,当前worker进程可以使用
+其他worker的写端发送消息,使用当前worker进程的读端监听可读事件。
+**/
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_event.h>
@@ -776,7 +786,18 @@ ngx_master_process_exit(ngx_cycle_t *cycle)
     exit(0);
 }
 
+/**
+ngx_spawn_process调用的proc函数,即worker进程的工作循环。
+proc是一个函数指针,worker进程对应的是ngx_worker_process_cycle函数。
 
+worker进程跟master进程一样,也主要是通过信号改变标识位来决定运行逻辑,
+信号  全局标识位   意义
+SIGQUIT ngx_quit    优雅的关闭进程
+SIGTERM ngx_terminate   强制关闭进程
+SIGINT  ngx_terminate   强制关闭进程
+SIGUSR1 ngx_reopen  重新打开所有文件
+*/
+//worker的工作循环
 static void
 ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
 {
@@ -785,12 +806,19 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
     ngx_process = NGX_PROCESS_WORKER;
     ngx_worker = worker;
 
+    //初始化worker进程
     ngx_worker_process_init(cycle, worker);
 
+    //设置进程名
     ngx_setproctitle("worker process");
 
     for ( ;; ) {
-
+         /* 若设置了退出标识位,则退出ngx_worker_process_cycle
+         * 该标识位仅当ngx_worker_process_cycle退出时使用
+         * 当ngx_quit被置位后,会将ngx_exiting置位
+         * ngx_quit被置位后执行的那段代码并没有调用ngx_worker_process_exit函数
+         * 而是放在这里执行
+         */
         if (ngx_exiting) {
             if (ngx_event_no_timers_left() == NGX_OK) {
                 ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0, "exiting");
@@ -800,6 +828,8 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
 
         ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "worker cycle");
 
+        //这个函数很重要,处理普通和定时事件的核心函数
+        //我们在分析事件模块时会对其进行重点分析
         ngx_process_events_and_timers(cycle);
 
         if (ngx_terminate) {
@@ -807,12 +837,18 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
             ngx_worker_process_exit(cycle);
         }
 
+         //该标识位表示优雅的关闭进程
         if (ngx_quit) {
             ngx_quit = 0;
             ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0,
                           "gracefully shutting down");
+            //设置进程的title
             ngx_setproctitle("worker process is shutting down");
 
+             /* 若ngx_exiting没有置位
+             * 则调用ngx_close_listening_sockets关闭所有监听的端口
+             * 然后将ngx_exiting置位
+             */
             if (!ngx_exiting) {
                 ngx_exiting = 1;
                 ngx_set_shutdown_timer(cycle);
@@ -821,6 +857,8 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
             }
         }
 
+        //该标识位置位代表需要重新打开所有文件
+        //调用ngx_reopen_files重新打开所有文件
         if (ngx_reopen) {
             ngx_reopen = 0;
             ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0, "reopening logs");
@@ -842,13 +880,16 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
     ngx_core_conf_t  *ccf;
     ngx_listening_t  *ls;
 
+     /* 设置全局的环境变量environ */
     if (ngx_set_environment(cycle, NULL) == NULL) {
         /* fatal */
         exit(2);
     }
 
+    /* 获取ngx_core_module模块的配置 */
     ccf = (ngx_core_conf_t *) ngx_get_conf(cycle->conf_ctx, ngx_core_module);
 
+    /* 设置worker进程优先级 */
     if (worker >= 0 && ccf->priority != 0) {
         if (setpriority(PRIO_PROCESS, 0, ccf->priority) == -1) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
@@ -856,6 +897,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
         }
     }
 
+    /* 调用setrlimit系统调用限制成员资源的使用 */
     if (ccf->rlimit_nofile != NGX_CONF_UNSET) {
         rlmt.rlim_cur = (rlim_t) ccf->rlimit_nofile;
         rlmt.rlim_max = (rlim_t) ccf->rlimit_nofile;
@@ -878,7 +920,11 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
         }
     }
 
+    /* geteuid()用于获取执行目前进程有效的用户id,root用户的uid为0
+     * 这里即是指若用户为root用户
+     */
     if (geteuid() == 0) {
+         /* 设置组ID */
         if (setgid(ccf->group) == -1) {
             ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
                           "setgid(%d) failed", ccf->group);
@@ -886,6 +932,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
             exit(2);
         }
 
+         /* 在user中设置组ID */
         if (initgroups(ccf->username, ccf->group) == -1) {
             ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
                           "initgroups(%s, %d) failed",
@@ -902,7 +949,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
             }
         }
 #endif
-
+          /* 将worker进程设置为拥有该文件所有者同样的权限 */
         if (setuid(ccf->user) == -1) {
             ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
                           "setuid(%d) failed", ccf->user);
@@ -932,6 +979,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
 #endif
     }
 
+     /* 根据配置文件决定是否进行cpu与进程的绑定 */
     if (worker >= 0) {
         cpu_affinity = ngx_get_cpu_affinity(worker);
 
@@ -952,6 +1000,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
 #endif
 
     if (ccf->working_directory.len) {
+         /* 更改工作路径 */
         if (chdir((char *) ccf->working_directory.data) == -1) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "chdir(\"%s\") failed", ccf->working_directory.data);
@@ -959,9 +1008,10 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
             exit(2);
         }
     }
-
+    /* 初始化信号集 */
     sigemptyset(&set);
 
+    /* 这一步的操作意味着清空进程的阻塞信号集 */
     if (sigprocmask(SIG_SETMASK, &set, NULL) == -1) {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                       "sigprocmask() failed");
@@ -974,11 +1024,16 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
      * disable deleting previous events for the listening sockets because
      * in the worker processes there are no events at all at this point
      */
+    /* 初始化worker进程所有的监听端口 */
     ls = cycle->listening.elts;
     for (i = 0; i < cycle->listening.nelts; i++) {
         ls[i].previous = NULL;
     }
 
+     /* 
+     * worker进程进行所有模块的自定义初始化
+     * 调用每个模块实现的init_process方法
+     */
     for (i = 0; cycle->modules[i]; i++) {
         if (cycle->modules[i]->init_process) {
             if (cycle->modules[i]->init_process(cycle) == NGX_ERROR) {
@@ -988,25 +1043,38 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
         }
     }
 
+    /* 
+     * ngx_processes[]是所有进程共享的全局变量
+     * 为了保证当前worker进程禁止读取master进程给其他worker进程的消息,因此需要关闭其他worker
+     进程的读端并保留对其他worker进程的写端和自身的读端,这是为了能够保持所有worker进程间的通信,
+     即通过其他worker进程写端写入消息,通过读端来接收来自master和其他worker进程的消息
+     */
     for (n = 0; n < ngx_last_process; n++) {
-
+        /* 跳过不存在的worker进程 */
         if (ngx_processes[n].pid == -1) {
             continue;
         }
-
+        /* 跳过该worker进程 */
         if (n == ngx_process_slot) {
             continue;
         }
 
+        /* 如果读端channel[1]已关闭,跳过 */
         if (ngx_processes[n].channel[1] == -1) {
             continue;
         }
 
+        /* 关闭对其他worker进程的读端文件描述符,保留写端文件描述符用于worker间的通信之用 */
         if (close(ngx_processes[n].channel[1]) == -1) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "close() channel failed");
         }
     }
+    /* 
+     * 关闭自身的写端文件描述符,因为每个worker进程只需要从读端读取消息,而不用给自己写消息
+     * 需要用到当前进程的写端文件描述符的是master以及其他的worker进程
+     * 其实这一系列操作都是为了关闭不必要的channel
+     */
 
     if (close(ngx_processes[ngx_process_slot].channel[0]) == -1) {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
@@ -1016,7 +1084,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
 #if 0
     ngx_last_process = 0;
 #endif
-
+      /* 根据全局变量ngx_channel开启一个通道,只用于处理读事件(ngx_channel_handler) */
     if (ngx_add_channel_event(cycle, ngx_channel, NGX_READ_EVENT,
                               ngx_channel_handler)
         == NGX_ERROR)
@@ -1041,6 +1109,8 @@ ngx_worker_process_exit(ngx_cycle_t *cycle)
 
     if (ngx_exiting) {
         c = cycle->connections;
+        //将所有连接的关闭标识位置位
+        //在退出前需要将所有读事件处理完
         for (i = 0; i < cycle->connection_n; i++) {
             if (c[i].fd != -1
                 && c[i].read
