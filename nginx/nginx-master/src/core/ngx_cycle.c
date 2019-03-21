@@ -243,18 +243,25 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
      * 首先是一个数组,每个数组成员是指针,指针指向存储某个模块的指针数组,该指针数组中的指针指向具体的配置项结构体
      */
     for (i = 0; cycle->modules[i]; i++) {
+        ////若非核心模块直接跳过
         if (cycle->modules[i]->type != NGX_CORE_MODULE) {
             continue;
         }
 
+        //获取到核心模块具体化ngx_module_t之后的结构体指针
         module = cycle->modules[i]->ctx;
 
+        //调用核心模块内通用性接口的create_conf方法
+        //用于创建存储配置项的数据结构
+        //并且在读取nginx.conf配置文件时,会根据ngx_command_t把解析出来的配置项
+        //存放在其中
         if (module->create_conf) {
             rv = module->create_conf(cycle);
             if (rv == NULL) {
                 ngx_destroy_pool(pool);
                 return NULL;
             }
+            //conf_ctx是一个四级指针,用于存放指向存储各模块配置项的结构体指针
             cycle->conf_ctx[cycle->modules[i]->index] = rv;
         }
     }

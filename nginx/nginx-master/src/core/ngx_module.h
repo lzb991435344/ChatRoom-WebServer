@@ -218,34 +218,86 @@
 
 #define NGX_MODULE_V1_PADDING  0, 0, 0, 0, 0, 0, 0, 0
 
+/**
+5个类型的模块:核心模块、配置模块、事件模块、http模块、mail模块。
+
+配置模块主要负责解析nginx.conf文件,是其他模块的基础,该类模块中只有一个ngx_conf_module模块;
+核心模块主要负责定义除配置模块之外的其他模块,该类模块中有6个核心模块。 
+    1.ngx_mail_module负责定义mail模块;
+    2.ngx_http_module负责定义http模块;
+    3.ngx_events_module负责定义事件模块;
+    4.ngx_core_module则是nginx启动加载的第一个模块,它主要用来保存全局配置项。
+    5.ngx_openssl_module只有当加载了之后,nginx才支持https请求
+    6.ngx_errlog_module
+事件模块即负责事件的注册、分发处理、销毁等,该类模块中主要有这几个模块: 
+    1.ngx_event_core_module负责加载其他事件模块,是其他事件模块的基础
+    2.ngx_epoll_module,该模块则是我们后面需要重点分析的模块,它负责事件的注册、集成、处理等
+    3.其他的模块比如ngx_kqueue_module这些我们后面基本不会涉及,就不解释了,毕竟是另外一种I/O多路复用机制,
+大致的思想是一样的
+
+ 除了核心模块与其他模块的联系之外,其实各类型模块中的子模块也有联系,同样也以事件模块为例子,在不同的系统
+平台上,I/O多路复用机制可能也不同,比如linux2.6之后的epoll、FreeBSD的kqueue等,那么选择一种合适的机制
+就成了一个很重要的问题,事件模块中的ngx_event_core_module就负责这个工作;又比如http模块中,
+ngx_http_core_module也负责决定对于不同的请求该选用哪一个http模块来处理。
+
+ 为了将每个模块简单的统一起来,nginx定义了ngx_module_t结构体作为每个模块的通用接口,同时考虑到灵活性的
+问题,ngx_module_t里面只涉及到了模块的初始化还有退出等操作,并且其中的ctx成员是一个void *指针,它可以
+作为任意一种具体类型的模块中的通用性接口,比如在事件模块中,又可以自己再实现一个通用性接口用于事件模块
+的统一。
+
+ 还记得ngx_modules数组吗,它的类型就是ngx_module_t,即存储了所有模块的ngx_module_t接口,通过遍历该数组
+问统一的接口,就可以做到初始化以及退出,并且通过ctx可以访问到具体类型模块的通用性接口(比如使用ctx调用核
+心模块中所有模块的create_conf方法)。
+
+*/
 
 struct ngx_module_s {
-    ngx_uint_t            ctx_index;
-    ngx_uint_t            index;
+    ngx_uint_t            ctx_index; //模块在该类模块中的序号
+    ngx_uint_t            index;//所有模块在ngx_modules数组中的序号
 
     char                 *name;
 
     ngx_uint_t            spare0;
     ngx_uint_t            spare1;
 
-    ngx_uint_t            version;
+    ngx_uint_t            version; //模块版本
     const char           *signature;
 
+    //该成员一般指向同一类型模块下的通用性接口
+    //这样的设计使得模块之间层次分明
+    //并且支持多种不同类型模块拥有自己特点的接口
+    //这样的做法称为具体化ngx_module_t接口
     void                 *ctx;
-    ngx_command_t        *commands;
+    ngx_command_t        *commands;//该数组指定了模块处理配置项的方法
+
+    //模块的类型
+    //比如配置模块的则是NGX_CONF_MODULE
+    //核心模块的则是NGX_CORE_MODULE
     ngx_uint_t            type;
 
+    //master进程初始化时使用
+    //不过我这个版本并没有使用
     ngx_int_t           (*init_master)(ngx_log_t *log);
 
+    //模块初始化时使用
     ngx_int_t           (*init_module)(ngx_cycle_t *cycle);
 
+    //工作进程初始化时使用
+    //在nginx初始化的最后阶段会调用
     ngx_int_t           (*init_process)(ngx_cycle_t *cycle);
+
+     //初始化/退出线程
+    //同样并没有使用
     ngx_int_t           (*init_thread)(ngx_cycle_t *cycle);
     void                (*exit_thread)(ngx_cycle_t *cycle);
-    void                (*exit_process)(ngx_cycle_t *cycle);
 
+    //工作进程退出时调用
+    void                (*exit_process)(ngx_cycle_t *cycle);
+    
+    //master进程退出时调用
     void                (*exit_master)(ngx_cycle_t *cycle);
 
+    //预留成员,并没有使用
     uintptr_t             spare_hook0;
     uintptr_t             spare_hook1;
     uintptr_t             spare_hook2;
