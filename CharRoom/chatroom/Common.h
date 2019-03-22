@@ -2,7 +2,7 @@
 #define CHATROOM_COMMON_H
 
 #include <iostream>
-#include <list>
+#include <list> //epoll上的fd连接在双链表上
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -40,9 +40,42 @@
 // 提醒你是聊天室中唯一的客户
 #define CAUTION "There is only one int the char room!"
 
+/**
+ addfd()函数的步骤：
+ (1)初始化结构体epoll_event，设置用户的fd,设置可读(宏)的fd,设置ET or LT模式
+（2）使用epoll_ctl()向epfd注册fd的上的event
+ (3)fcntl()设置socket为nonblocking模式
+*/
 
 // 注册新的fd到epollfd中
 // 参数enable_et表示是否启用ET模式，如果为True则启用，否则使用LT模式
+/**
+ @function 添加句柄
+ @param epollfd(int) 创建的句柄
+ @param fd(int) 用户数据的fd文件描述符
+ @param enable_et(bool) 是否启用et模式，true则启用，否则是LT模式
+ @return void
+*/
+/** ET和LT的区别
+一、ET模式的文件描述符(fd)：
+
+当epoll_wait检测到fd上有事件发生并将此事件通知应用程序后，应用程序必须立即处理该事件，
+因为后续的epoll_wait调用将不再向应用程序通知这一事件。
+epoll_wait只有在客户端第一次发数据是才会返回,以后即使缓冲区里还有数据，也不会返回了。
+epoll_wait是否返回，是看客户端是否发数据，客户端发数据了就会返回，且只返回一次。
+eg：客户端发送数据，I/O函数只会提醒一次服务端fd上有数据，以后将不会再提醒
+所以要求服务端必须一次把数据读完--->循环读数据 (读完数据后，可能会阻塞)  --->将描述符设置
+成非阻塞模式
+
+二、LT模式的文件描述符(fd)：
+当epoll_wait检测到fd上有事件发生并将此事件通知应用程序后，应用程序可以不立即处理该事件，
+这样，当应用程序下一次调用epoll_wait时，epoll_wait还会再次向应用程序通知此事件，直到此事
+件被处理。
+eg：客户端发送数据，I/O函数会提醒描述符fd有数据---->recv读数据，若一次没有读完，I/O函数
+会一直提醒服务端fd上有数据，直到recv缓冲区里的数据读完
+三 结论：ET模式在很大程度上降低了同一个epoll事件被重复触发的次数
+*/
+
 static void addfd( int epollfd, int fd, bool enable_et )
 {
 	/**
@@ -66,7 +99,7 @@ static void addfd( int epollfd, int fd, bool enable_et )
 
     struct epoll_event ev;
     ev.data.fd = fd;
-
+ 
 	//设置可读的文件描述符
     ev.events = EPOLLIN;//可读
     if( enable_et ) //这里做判断是否启用et模式，true则启用，否则是LT模式
@@ -91,6 +124,8 @@ static void addfd( int epollfd, int fd, bool enable_et )
 
 fcntl（文件描述词操作）
 相关函数  open，flock
+ 可以用fcntl 函数改变一个已打开的文件的属性,可以重新设置读、写、追加、非阻塞等标志
+(这些标志称为File StatusFlag),而不必重新open 文件。
 
 表头文件  #include<unistd.h>
 #include<fcntl.h>
@@ -111,7 +146,7 @@ F_SETLK 设置文件锁定的状态。此时flcok 结构的l_type 值必须是F_
 F_SETLKW F_SETLK 作用相同，但是无法建立锁定时，此调用会一直等到锁定动作成功为止。若在等待锁定的过程中被信号中断时，会立即返回-1，错误代码为EINTR。参数lock指针为flock 结构指针，定义如下
 struct flcok
 {
-short int l_type; // 锁定的状态
+    short int l_type; // 锁定的状态
 	short int l_whence;//决定l_start位置
 	off_t l_start; //锁定区域的开头位置
 	off_t l_len; //锁定区域的大小
@@ -125,10 +160,8 @@ l_whence 也有三种方式 :
    SEEK_SET 以文件开头为锁定的起始位置。
    SEEK_CUR 以目前文件读写位置为锁定的起始位置
    SEEK_END 以文件结尾为锁定的起始位置。
-
 返回值  成功则返回0，若有错误则返回 - 1，错误原因存于errno.
-
-	*/
+*/
 
 	//F_SETFL 设置文件描述词状态旗标，参数arg为新旗标，
 	//但只允许O_APPEND、O_NONBLOCK和O_ASYNC位的改变，其他位的改变
