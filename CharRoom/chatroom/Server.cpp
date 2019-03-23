@@ -62,13 +62,12 @@ void Server::Init() {
         exit(-1);
     }
 
-    //监听
+    //监听，socket主动变被动
 	/**
 	int listen(int sockfd, int backlog);
-	 listen函数的第一个参数即为要监听的socket描述字，第二个参数为相应socket可以排队的最大连接个数。socket()函数创建的socket默认是一个主动类型的，
+	 listen函数的第一个参数即为要监听的socket描述字，第二个参数为相应socket可以排队的最大连接个数。
+     socket()函数创建的socket默认是一个主动类型的，
 	 listen函数将socket变为被动类型的，等待客户的连接请求。
-
-
 	*/
     int ret = listen(listener, 5);
     if(ret < 0) {
@@ -79,7 +78,7 @@ void Server::Init() {
     cout << "Start to listen: " << SERVER_IP << endl;
 
     //在内核中创建事件表
-    epfd = epoll_create(EPOLL_SIZE);
+    epfd = epoll_create(EPOLL_SIZE); //5000
     
     if(epfd < 0) 
     {
@@ -107,7 +106,7 @@ int Server::SendBroadcastMessage(int clientfd)
 {
     // buf[BUF_SIZE] 接收新消息
     // message[BUF_SIZE] 保存格式化的消息
-    char buf[BUF_SIZE], message[BUF_SIZE];
+    char buf[BUF_SIZE], message[BUF_SIZE];//0xFFFF  65535
 	/**
 	原型：extern void bzero（void *s, int n）;
 　　用法：#include <string.h>
@@ -212,7 +211,7 @@ void Server::Start() {
                 socklen_t client_addrLength = sizeof(struct sockaddr_in);
 
 				/**
-				accept(int socket, sockaddr *name, int *addrlen)
+				int accept(int socket, sockaddr *name, int *addrlen)
 		       第一个参数，是一个已设为监听模式的socket的描述符。
 		       第二个参数，是一个返回值，它指向一个struct sockaddr类型的结构体的变量，保存了发起连接的客户端得IP地址信息和端口信息。
 		       第三个参数，也是一个返回值，指向整型的变量，保存了返回的地址信息的长度。

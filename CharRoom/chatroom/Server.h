@@ -24,7 +24,7 @@ public:
     void Start();
 
 private:
-    // 广播消息给所有客户端
+    // 广播消息给所有客户端，
     int SendBroadcastMessage(int clientfd);
 
     // 服务器端serverAddr信息
