@@ -27,6 +27,7 @@ Client::Client(){
     epfd = 0;
 }
 
+//测试连接
 // 连接服务器
 void Client::Connect()
 {
