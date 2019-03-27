@@ -331,7 +331,7 @@ void execute_cgi(int client, const char *path, const char *method, const char *q
             numchars = get_line(client, buf, sizeof(buf));
         }
         /*没有找到 content_length */
-        if (content_length == -1) {
+		if (content_length == -1) {
             /*错误请求*/
             bad_request(client);
             return;
@@ -618,7 +618,10 @@ socket函数的三个参数分别为：
 	//结构体对象全部初始化为0
     memset(&name, 0, sizeof(name));
     name.sin_family = AF_INET;
-    name.sin_port = htons(*port);
+    name.sin_port = htons(*port);//字节序的转换
+	//linux下的socket INADDR_ANY表示的是一个服务器上所有的网卡
+	//（服务器可能不止一个网卡）
+    //多个本地ip地址都进行绑定端口号，进行侦听。
     name.sin_addr.s_addr = htonl(INADDR_ANY);
 	//绑定socket到指定的地址
 
