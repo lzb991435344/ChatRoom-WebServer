@@ -112,7 +112,53 @@ ngx_module_t  ngx_events_module = {
     NULL,                                  /* exit master */
     NGX_MODULE_V1_PADDING
 };
+/**
+15.事件模块小结
+    1.配置项结构体创建及赋值
+    
+    2.初始化工作
+     ngx_init_cycle接着遍历ngx_modules数组,调用各模块的init_module方法,根据配置项结构体中的
+    成员做一些初始化工作。对于ngx_event_core_module模块来说,该函数会根据其配置项结构体的内容初
+    始化一些用于统计变量(与事件模块关系不是很大),而ngx_epoll_module则没有实现该方法。
+    接下来的工作,就可以开始分不同进程进行了。还记得nginx通过什么样的步骤来开启的子进程的吗？首先
+    配置文件中设置的worker_processes配置指令如果为1,则nginx以单进程模式运行,若大与1,则以多进程
+    模式运行。
 
+     多进程模式下,nginx会调用ngx_master_process_cycle函数,即master进程的工作循环。在master进程的工作
+    循环中,它会先设置一些信号的捕捉函数,别忘了master进程靠各种标志位来选择进行什么样的工作。接着就会调
+    用ngx_start_worker_processes函数启动worker_processes个子进程。在ngx_start_worker_processes中,
+    调用的核心函数是ngx_spawn_process,其中fork了进程之后,会调用ngx_worker_process_cycle,即子进程的
+    工作循环。
+
+    在子进程的工作循环中,第一件事就是调用ngx_worker_process_init,它会调用所有模块的init_process函数。
+    对于事件模块中的ngx_event_core_module模块来说,它对应的init_process主要做了以下工作:
+
+    1.初始化定时器
+    2.调用配置中指定的事件驱动模块的init方法
+    3.若设置了timer_resolution,则定时调用ngx_timer_signal_handler,控制时间精度
+    4.预分配连接池(cycle->connections)
+    5.预分配读事件(cycle->read_events)
+    6.预分配写事件(cycle->write_events)
+    7.将对应的读、写事件放置到对应的connections连接中
+    8.初始化连接池,当前所有连接均为空闲连接,因此cycle->free_connections指向连接池首部
+    9.设置监听套接字上读事件的处理方法为ngx_event_accept,即建立新连接
+    10.将监听套接字的读事件添加到事件驱动模块中(若打开了accept_mutex锁不会执行这一步)
+
+    3.处理事件
+      接着子进程正式开始工作,而其工作的核心函数就是ngx_process_events_and_timers,
+    若开启了accept_mutex并且当前进程的负载还没有达到总连接的7/8,会让进程去获取
+    accept_mutex锁,获取到该锁的进程可以处理新连接,没有获取到的只能调用epoll_wait处
+    理已有的连接的事件,不过过若在epoll_wait上阻塞了accept_mutex_delay毫秒之后,又可
+    以再次尝试去获取锁。调用epoll_wait并处理事件的函数是ngx_process_events,对应epoll
+    模块中是ngx_epoll_process_events。
+      获取到了accept_mutex锁的进程会将就绪的事件放入对应的post事件队列中延后处理,因为如果
+    还是在ngx_process_events函数中调用处理函数handler,会导致进程长时间占有accept_mutex
+    锁得不到释放,导致其他进程获取不到该锁。因此ngx_process_events还负责将设置了NGX_POST_EVENTS
+    标志位的事件加入post事件队列,注意post事件队列有两个,一个是建立新连接的事件的队列,另一个是其
+    他普通的读/写事件的队列。在ngx_process_events_and_timers中先将post事件队列中建立新连接的事
+    件处理了,然后释放锁,接着再处理post事件队列的其他事件。
+
+*/
 
 static ngx_str_t  event_core_name = ngx_string("event_core");
 
@@ -188,7 +234,69 @@ ngx_module_t  ngx_event_core_module = {
     NULL,                                  /* exit master */
     NGX_MODULE_V1_PADDING
 };
+/**
+  惊群问题
+  1.accept惊群问题
+    当多个进程/线程调用accept监听同一个socket上时,一个新连接的到来就会导致所
+ 有阻塞在该socket上的进程/线程都被唤醒,但是最后只有一个进程/线程可以accept
+ 成功,其余的又会重新休眠。
+    linux中的解决方案：
+    维护了一个等待队列(队列的元素为进程),并且使用了WQ_FLAG_EXCLUSIVE标志位(互斥标志位),
+    非exclusive元素会加在等待队列的前面,而exclusive元素会加在等待队列的末尾,当有新连接到
+    来时,会遍历等待队列,并且只唤醒第一个exclusive进程(非互斥的进程由于排在队列前面也会被唤醒)
+    就退出遍历。
 
+    阻塞在accept上的进程都是互斥的(也就是WQ_FLAG_EXCLUSIVE标志位会被置位),因此现在的linux内核
+    调用accept时,多个进程/线程只有一个会被唤醒并建立新连接
+
+  2.epoll导致的惊群问题(nginx主要的问题)
+   解决多个epfd(epfd是指调用epoll_create获取的描述符)共同监听同一个socket造成的惊群问题
+   以下两个问题实质是epoll_create和fork函数调用的先后问题
+   (1)多个进程/线程使用同一个epfd然后调用epoll_wait 
+    先调用epoll_create获取epfd,再使用fork,各进程共用同一个epfd
+   (2)多个进程/线程有自己的epfd,然后监听同一个socket ---nginx面对的主要问题
+    先fork,再调用epoll_create,各进程独享自己的epfd
+    nginx的每个worker进程相互独立,拥有自己的epfd,不过根据配置文件中的listen指令都监
+    听了同一个端口,调用epoll_wait时,若共同监听的套接字有事件发生,就会造成每个worker进程都被唤醒。
+
+  3.具体引起惊群的过程和解决方法
+  3.1 多个进程共用一个epfd
+
+  3.2 多个进程有自己的epfd
+   每个进程都有自己的epfd,就不会导致这个问题,不过当多个epfd中都监听了
+    同一个socket,还是会出现问题,当该socket上有事件发生时,每个阻塞在epoll_wait上的进程
+    还是会引起惊群
+    (1)accept_accept锁
+    (2)采用EPOLLEXCLUSIVE选项 
+      epoll_ctl()的第二个参数，专门为了解决多个epfd句柄监听同一个socket的惊群问题
+    该选项是针对具体的socket,即调用epoll_ctl时传入,不过需要注意的是,只能和EPOLL_CTL_ADD
+    伴随使用,而不支持和EPOLL_CTL_MOD伴随使用。它是如何起作用的,这个和epoll的实现有关。前面我
+    们提到过struct eventpoll结构体中有wq等待队列 而每个监听套接字,都有自己的等待队列。当设置
+    了EPOLLEXCLUSIVE选项之后,调用epoll_ctl添加监听套接字,其内部会调用ep_insert函数,其中又
+    会回调ep_ptable_queue_proc,它会给设备设置ep_poll_callback回调函数,监听套接字的等待队
+    列中其实就是设备等待队列,当设备上有数据时,就会回调ep_poll_callback唤醒进程。添加元素到
+    队列中的操作主要如下:
+     .....
+    init_waitqueue_func_entry(&pwq->wait, ep_poll_callback);
+    pwq->whead = whead;
+    pwq->base = epi;
+    if (epi->event.events & EPOLLEXCLUSIVE)
+      add_wait_queue_exclusive(whead, &pwq->wait);
+    else
+      add_wait_queue(whead, &pwq->wait);
+    ......
+    以前的版本调用add_wait_queue添加到whead队列中,当该fd的状态有变化时,会轮询队列中所有元素,
+    调用ep_poll_callback唤醒进程,导致惊群问题。使用add_wait_queue_exclusive之后,当fd的状态
+    有变化时,也会遍历该等待队列,但遇到第一个拥有WQ_FLAG_EXCLUSIVE的进程停止,回调
+    ep_poll_callback函数将该进程唤醒,避免了全部进程都被唤醒。
+
+    (3)使用SO_REUSEPORT选项 
+    SO_REUSEPORT选项支持多个进程或者线程绑定到同一端口,即允许多个套接字bind()/listen()同一个
+    TCP/UDP端口,并且在内核层面实现负载均衡。有了这个选项,我们就不用再使用互斥锁的方式来避免惊群
+    问题了,因此现在默认ngx_use_accept_mutex选项为off。要求nginx的版本在1.9.1以上,以及 
+    linux内核版本3.9以上。
+
+*/
 
 void
 ngx_process_events_and_timers(ngx_cycle_t *cycle)
@@ -214,20 +322,34 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
 
 #endif
     }
+    /**
+    (2)使用accept_mutex的锁，损失一定的效率避免惊群
+     具体实现：使用全局互斥锁,每个子进程在调用epoll_wait()之前先去申请锁,申请到才允许
+     将监听套结字加入epoll中。获取不到则等待,并设置了一个负载均衡的算法(当某一个子进程的
+     连接数达到的连接池总连接数的7/8时,则不会再尝试去申请锁,而是处理已有的连接)来均衡各
+     个进程的任务量。
+    */
 
+/* 负载均衡锁,当前进程的连接数数大于总连接数的7/8时,认为处于负载状态,则不会进行新连接的建立
+ * 而只是将ngx_accept_disabled减1,否则尝试获取锁进行下一步操作
+ */
     if (ngx_use_accept_mutex) {
         if (ngx_accept_disabled > 0) {
             ngx_accept_disabled--;
-
         } else {
+             //尝试获取锁,若获取成功,会把监听套结字加入到当前的epoll事件驱动模块中
             if (ngx_trylock_accept_mutex(cycle) == NGX_ERROR) {
-                return;
-            }
-
+                return            };
+         /* ngx_accept_mutex_held标志位为1,代表当前进程已经拥有锁
+         * 若当前进程已经拥有锁,则将flag添加上NGX_POST_EVENTS位
+         * 表示会延迟处理所有的事件
+         * 这是因为我们应该使持锁和解锁之间的事件尽量短
+         * 因此将事件放置在post队列中,放在后面处理
+         */
             if (ngx_accept_mutex_held) {
                 flags |= NGX_POST_EVENTS;
-
             } else {
+                //判断设置定时器
                 if (timer == NGX_TIMER_INFINITE
                     || timer > ngx_accept_mutex_delay)
                 {
@@ -236,9 +358,11 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
             }
         }
     }
-
+    //计算ngx_process_events()使用多长时间
     delta = ngx_current_msec;
 
+    //使用epoll作为驱动机制时
+    //ngx_process_events对应ngx_epoll_process_events函数
     (void) ngx_process_events(cycle, timer, flags);
 
     delta = ngx_current_msec - delta;
@@ -246,16 +370,19 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "timer delta: %M", delta);
 
+    //执行对应新建连接的延迟队列里面的事件
     ngx_event_process_posted(cycle, &ngx_posted_accept_events);
 
+    //锁的标志位为1，解锁
     if (ngx_accept_mutex_held) {
         ngx_shmtx_unlock(&ngx_accept_mutex);
     }
-
+    ////ngx_process_events方法耗费delta>0时
+   //调用ngx_event_expire_timers执行所有的超时事件
     if (delta) {
-        ngx_event_expire_timers();
+        ngx_event_expire_timers();//超时事件
     }
-
+    //执行普通事件延迟队列中事件
     ngx_event_process_posted(cycle, &ngx_posted_events);
 }
 

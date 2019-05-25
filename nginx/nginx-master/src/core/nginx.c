@@ -57,7 +57,7 @@ static char *ngx_load_module(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static void ngx_unload_module(void *data);
 #endif
 
-
+//
 static ngx_conf_enum_t  ngx_debug_points[] = {
     { ngx_string("stop"), NGX_DEBUG_POINTS_STOP },
     { ngx_string("abort"), NGX_DEBUG_POINTS_ABORT },
