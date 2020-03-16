@@ -44,6 +44,7 @@ private:
     char message[BUF_SIZE];
 
     //用户连接的服务器 IP + port
+    //以太网套接字的结构体，与通用的不太一样
     struct sockaddr_in serverAddr;
 };
 
